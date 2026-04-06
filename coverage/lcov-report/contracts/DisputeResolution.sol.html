@@ -1,0 +1,1220 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts\DisputeResolution.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> DisputeResolution.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">70% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>28/40</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">36.49% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>27/74</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">68.75% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>11/16</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">71.19% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>42/59</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line medium'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">46×</span>
+<span class="cline-any cline-yes">46×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">45×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">45×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+&nbsp;
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+&nbsp;
+/**
+ * @title DisputeResolution
+ * @author HPC Marketplace Team
+ * @notice Implements a multi-phase arbitration protocol for resolving compute job disputes.
+ * @dev Dispute lifecycle: Raised → Evidence Collection → Arbitration → Resolved.
+ *      Time-locked escalation ensures disputes don't stall indefinitely.
+ *      Slashing mechanics penalize the losing party to discourage frivolous disputes.
+ *
+ * Design Rationale:
+ *   - Evidence submission is on-chain (hash references) to maintain an immutable audit trail.
+ *   - The grace period model follows optimistic rollup patterns: results are accepted unless
+ *     challenged within a configurable window, minimizing on-chain overhead for honest actors.
+ *   - Arbitration is currently owner-controlled (suitable for prototype/testnet deployment);
+ *     production would extend to a decentralized arbitration panel (e.g., Kleros-style).
+ */
+contract DisputeResolution is ReentrancyGuard {
+&nbsp;
+    // ============ Enums ============
+&nbsp;
+    /// @notice Lifecycle stages of a dispute
+    enum DisputeStatus {
+        None,               // No dispute exists
+        Raised,             // Dispute has been initiated by the client
+        EvidencePeriod,     // Both parties may submit evidence hashes
+        UnderArbitration,   // Arbitration panel is reviewing
+        ResolvedClient,     // Resolved in favor of the client (refund)
+        ResolvedProvider,   // Resolved in favor of the provider (payment released)
+        Expired             // Dispute window expired without action — defaults to provider
+    }
+&nbsp;
+    // ============ Structs ============
+&nbsp;
+    /// @notice Encapsulates the full state of a single dispute
+    struct Dispute {
+        uint256 jobId;                  // References the JobMarket job ID
+        address client;                 // The party that raised the dispute
+        address provider;               // The provider being disputed
+        DisputeStatus status;           // Current lifecycle stage
+        uint256 raisedAt;               // Block timestamp when dispute was created
+        uint256 evidenceDeadline;       // Timestamp after which no more evidence is accepted
+        uint256 resolutionDeadline;     // Timestamp after which dispute auto-resolves
+        string clientEvidenceHash;      // IPFS hash of client-submitted evidence
+        string providerEvidenceHash;    // IPFS hash of provider-submitted evidence
+        uint256 stakeAtRisk;            // Amount of stake that can be slashed
+        string arbitratorReason;        // On-chain reason string from the arbitrator
+    }
+&nbsp;
+    // ============ State Variables ============
+&nbsp;
+    address public owner;
+    address public jobMarketContract;
+&nbsp;
+    /// @notice Duration (in seconds) during which evidence can be submitted
+    uint256 public evidencePeriodDuration = 3 days;
+&nbsp;
+    /// @notice Duration (in seconds) for the arbitration panel to render a decision
+    uint256 public arbitrationDuration = 5 days;
+&nbsp;
+    /// @notice Percentage of stake slashed from the losing party (basis points, e.g., 1000 = 10%)
+    uint256 public slashPercentBps = 1000;
+&nbsp;
+    /// @notice Auto-incrementing dispute identifier
+    uint256 public disputeCounter;
+&nbsp;
+    /// @notice Mapping from dispute ID to Dispute struct
+    mapping(uint256 =&gt; Dispute) public disputes;
+&nbsp;
+    /// @notice Mapping from job ID to dispute ID for quick lookup
+    mapping(uint256 =&gt; uint256) public jobToDispute;
+&nbsp;
+    /// @notice Tracks accumulated slashed funds available for redistribution
+    uint256 public slashedFundsPool;
+&nbsp;
+    // ============ Events ============
+&nbsp;
+    event DisputeRaised(
+        uint256 indexed disputeId,
+        uint256 indexed jobId,
+        address indexed client,
+        address provider,
+        uint256 evidenceDeadline
+    );
+&nbsp;
+    event EvidenceSubmitted(
+        uint256 indexed disputeId,
+        address indexed submitter,
+        string evidenceHash,
+        bool isClient
+    );
+&nbsp;
+    event DisputeResolved(
+        uint256 indexed disputeId,
+        uint256 indexed jobId,
+        DisputeStatus resolution,
+        string reason
+    );
+&nbsp;
+    event StakeSlashed(
+        address indexed party,
+        uint256 amount,
+        uint256 indexed disputeId
+    );
+&nbsp;
+    event DisputeEscalated(
+        uint256 indexed disputeId,
+        DisputeStatus newStatus
+    );
+&nbsp;
+    // ============ Modifiers ============
+&nbsp;
+    modifier onlyOwner() {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.sender == owner, "DisputeResolution: caller is not the owner");
+        _;
+    }
+&nbsp;
+    modifier onlyJobMarket() {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.sender == jobMarketContract, "DisputeResolution: caller is not JobMarket");
+        _;
+    }
+&nbsp;
+    modifier disputeExists(uint256 _disputeId) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_disputeId &gt; 0 &amp;&amp; _disputeId &lt;= disputeCounter, "DisputeResolution: dispute does not exist");
+        _;
+    }
+&nbsp;
+    // ============ Constructor ============
+&nbsp;
+    /// @param _owner Address of the contract administrator / arbitration authority
+    constructor(address _owner) {
+        owner = _owner;
+    }
+&nbsp;
+    // ============ Configuration ============
+&nbsp;
+    /// @notice Links this contract to the JobMarket contract (one-time setup)
+    /// @param _jobMarket Address of the deployed JobMarket contract
+    function setJobMarketContract(address _jobMarket) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyOwner {
+        jobMarketContract = _jobMarket;
+    }
+&nbsp;
+    /// @notice Updates the evidence submission window duration
+    /// @param _duration New duration in seconds
+<span class="fstat-no" title="function not covered" >    function setEvidencePeriodDuration(uint256 _duration) external onlyOwner {</span>
+<span class="cstat-no" title="statement not covered" >        require(_duration &gt;= 1 hours, "DisputeResolution: duration too short")</span>;
+        evidencePeriodDuration = _duration;
+    }
+&nbsp;
+    /// @notice Updates the slash percentage applied to losing parties
+    /// @param _bps New slash rate in basis points (100 bps = 1%)
+<span class="fstat-no" title="function not covered" >    function setSlashPercent(uint256 _bps) external onlyOwner {</span>
+<span class="cstat-no" title="statement not covered" >        require(_bps &lt;= 5000, "DisputeResolution: slash rate exceeds 50%")</span>;
+        slashPercentBps = _bps;
+    }
+&nbsp;
+    // ============ Dispute Lifecycle ============
+&nbsp;
+    /**
+     * @notice Initiates a new dispute for a given job.
+     * @dev Called by the JobMarket contract when a client raises a dispute.
+     *      The function does NOT transfer funds — the JobMarket contract holds escrow.
+     * @param _jobId       The job ID from the JobMarket contract
+     * @param _client      Address of the disputing client
+     * @param _provider    Address of the provider being disputed
+     * @param _stakeAtRisk Amount of provider stake that could be slashed
+     * @return disputeId   The newly created dispute's identifier
+     */
+    function raiseDispute(
+        uint256 _jobId,
+        address _client,
+        address _provider,
+        uint256 _stakeAtRisk
+    ) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyJobMarket returns (uint256) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(jobToDispute[_jobId] == 0, "DisputeResolution: dispute already exists for this job");
+&nbsp;
+        disputeCounter++;
+        uint256 evidenceDeadline = block.timestamp + evidencePeriodDuration;
+        uint256 resolutionDeadline = evidenceDeadline + arbitrationDuration;
+&nbsp;
+        disputes[disputeCounter] = Dispute({
+            jobId: _jobId,
+            client: _client,
+            provider: _provider,
+            status: DisputeStatus.Raised,
+            raisedAt: block.timestamp,
+            evidenceDeadline: evidenceDeadline,
+            resolutionDeadline: resolutionDeadline,
+            clientEvidenceHash: "",
+            providerEvidenceHash: "",
+            stakeAtRisk: _stakeAtRisk,
+            arbitratorReason: ""
+        });
+&nbsp;
+        jobToDispute[_jobId] = disputeCounter;
+&nbsp;
+        emit DisputeRaised(disputeCounter, _jobId, _client, _provider, evidenceDeadline);
+&nbsp;
+        return disputeCounter;
+    }
+&nbsp;
+    /**
+     * @notice Submits evidence for an active dispute.
+     * @dev Evidence is stored as an IPFS content hash. Only the client or provider
+     *      involved in the dispute may submit, and only before the evidence deadline.
+     * @param _disputeId   The dispute to submit evidence for
+     * @param _evidenceHash IPFS hash pointing to the evidence document/data
+     */
+    function submitEvidence(
+        uint256 _disputeId,
+        string calldata _evidenceHash
+    ) external <span class="missing-if-branch" title="else path not taken" >E</span>disputeExists(_disputeId) {
+        Dispute storage dispute = disputes[_disputeId];
+&nbsp;
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(
+            dispute.status == DisputeStatus.Raised || dispute.status == DisputeStatus.EvidencePeriod,
+            "DisputeResolution: dispute not accepting evidence"
+        );
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(block.timestamp &lt;= dispute.evidenceDeadline, "DisputeResolution: evidence period has ended");
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(
+            msg.sender == dispute.client || msg.sender == dispute.provider,
+            "DisputeResolution: caller is not a party to this dispute"
+        );
+&nbsp;
+        bool isClient = (msg.sender == dispute.client);
+&nbsp;
+        if (isClient) {
+            dispute.clientEvidenceHash = _evidenceHash;
+        } else {
+            dispute.providerEvidenceHash = _evidenceHash;
+        }
+&nbsp;
+        // Transition to EvidencePeriod on first evidence submission
+        if (dispute.status == DisputeStatus.Raised) {
+            dispute.status = DisputeStatus.EvidencePeriod;
+        }
+&nbsp;
+        emit EvidenceSubmitted(_disputeId, msg.sender, _evidenceHash, isClient);
+    }
+&nbsp;
+    /**
+     * @notice Escalates a dispute to arbitration after the evidence period ends.
+     * @dev Can be called by anyone — this is a permissionless state transition
+     *      that merely moves the dispute from EvidencePeriod to UnderArbitration.
+     * @param _disputeId The dispute to escalate
+     */
+<span class="fstat-no" title="function not covered" >    function escalateToArbitration(uint256 _disputeId) external disputeExists(_disputeId) {</span>
+<span class="cstat-no" title="statement not covered" >        Dispute storage dispute = disputes[_disputeId];</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        require(</span>
+            dispute.status == DisputeStatus.Raised || dispute.status == DisputeStatus.EvidencePeriod,
+            "DisputeResolution: cannot escalate from current status"
+        );
+<span class="cstat-no" title="statement not covered" >        require(</span>
+            block.timestamp &gt; dispute.evidenceDeadline,
+            "DisputeResolution: evidence period has not ended yet"
+        );
+&nbsp;
+        dispute.status = DisputeStatus.UnderArbitration;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        emit DisputeEscalated(_disputeId, DisputeStatus.UnderArbitration);</span>
+    }
+&nbsp;
+    /**
+     * @notice Arbitrator resolves the dispute in favor of one party.
+     * @dev Only the contract owner (acting as arbitrator) can call this.
+     *      In production, this would be replaced by a multi-sig or DAO vote.
+     * @param _disputeId   The dispute to resolve
+     * @param _favorClient True to resolve in favor of client, false for provider
+     * @param _reason      On-chain justification string for the decision
+     */
+    function resolveDispute(
+        uint256 _disputeId,
+        bool _favorClient,
+        string calldata _reason
+    ) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyOwner <span class="missing-if-branch" title="else path not taken" >E</span>disputeExists(_disputeId) <span class="missing-if-branch" title="else path not taken" >E</span>nonReentrant {
+        Dispute storage dispute = disputes[_disputeId];
+&nbsp;
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(
+<span class="branch-0 cbranch-no" title="branch not covered" >            dispute.status == DisputeStatus.UnderArbitration ||</span>
+            dispute.status == DisputeStatus.EvidencePeriod ||
+            dispute.status == DisputeStatus.Raised,
+            "DisputeResolution: dispute not resolvable"
+        );
+&nbsp;
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (_favorClient) {
+            dispute.status = DisputeStatus.ResolvedClient;
+        } else {
+            dispute.status = DisputeStatus.ResolvedProvider;
+        }
+&nbsp;
+        dispute.arbitratorReason = _reason;
+&nbsp;
+        // Calculate and track slashed amount
+        uint256 slashAmount = (dispute.stakeAtRisk * slashPercentBps) / 10000;
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (slashAmount &gt; 0) {
+            slashedFundsPool += slashAmount;
+            address losingParty = _favorClient ? dispute.provider : <span class="missing-if-branch" title="else path not taken" >E</span>dispute.client;
+            emit StakeSlashed(losingParty, slashAmount, _disputeId);
+        }
+&nbsp;
+        emit DisputeResolved(_disputeId, dispute.jobId, dispute.status, _reason);
+    }
+&nbsp;
+    /**
+     * @notice Auto-resolves an expired dispute in favor of the provider.
+     * @dev If the resolution deadline passes without arbitrator action,
+     *      anyone can trigger this to resolve in the provider's favor.
+     *      This follows the "optimistic" pattern used in rollup dispute systems.
+     * @param _disputeId The dispute to auto-resolve
+     */
+<span class="fstat-no" title="function not covered" >    function autoResolveExpired(uint256 _disputeId) external disputeExists(_disputeId) {</span>
+<span class="cstat-no" title="statement not covered" >        Dispute storage dispute = disputes[_disputeId];</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        require(</span>
+            dispute.status != DisputeStatus.ResolvedClient &amp;&amp;
+            dispute.status != DisputeStatus.ResolvedProvider &amp;&amp;
+            dispute.status != DisputeStatus.Expired,
+            "DisputeResolution: dispute already resolved"
+        );
+<span class="cstat-no" title="statement not covered" >        require(</span>
+            block.timestamp &gt; dispute.resolutionDeadline,
+            "DisputeResolution: resolution deadline has not passed"
+        );
+&nbsp;
+        dispute.status = DisputeStatus.Expired;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        emit DisputeResolved(</span>
+            _disputeId,
+            dispute.jobId,
+            DisputeStatus.Expired,
+            "Auto-resolved: arbitration deadline exceeded"
+        );
+    }
+&nbsp;
+    // ============ View Functions ============
+&nbsp;
+    /**
+     * @notice Retrieves the full dispute struct for a given dispute ID.
+     * @param _disputeId The dispute identifier
+     * @return The Dispute struct
+     */
+    function getDispute(uint256 _disputeId) external view returns (Dispute memory) {
+        return disputes[_disputeId];
+    }
+&nbsp;
+    /**
+     * @notice Looks up the dispute ID associated with a job.
+     * @param _jobId The job identifier from JobMarket
+     * @return The dispute ID (0 if no dispute exists)
+     */
+    function getDisputeByJob(uint256 _jobId) external view returns (uint256) {
+        return jobToDispute[_jobId];
+    }
+&nbsp;
+    /**
+     * @notice Checks whether a dispute is still within its evidence submission window.
+     * @param _disputeId The dispute identifier
+     * @return True if evidence can still be submitted
+     */
+<span class="fstat-no" title="function not covered" >    function isInEvidencePeriod(uint256 _disputeId) external view returns (bool) {</span>
+<span class="cstat-no" title="statement not covered" >        Dispute storage dispute = disputes[_disputeId];</span>
+<span class="cstat-no" title="statement not covered" >        return (</span>
+            (dispute.status == DisputeStatus.Raised || dispute.status == DisputeStatus.EvidencePeriod) &amp;&amp;
+            block.timestamp &lt;= dispute.evidenceDeadline
+        );
+    }
+&nbsp;
+    /**
+     * @notice Returns whether a dispute has been finalized (resolved or expired).
+     * @param _disputeId The dispute identifier
+     * @return True if the dispute reached a terminal state
+     */
+    function isResolved(uint256 _disputeId) external view returns (bool) {
+        DisputeStatus s = disputes[_disputeId].status;
+        return (
+            s == DisputeStatus.ResolvedClient ||
+<span class="branch-1 cbranch-no" title="branch not covered" >            s == DisputeStatus.ResolvedProvider</span> ||
+            s == DisputeStatus.Expired
+        );
+    }
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sun Feb 22 2026 03:34:32 GMT+0530 (India Standard Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

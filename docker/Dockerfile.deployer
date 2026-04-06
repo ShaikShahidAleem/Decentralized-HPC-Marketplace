@@ -1,0 +1,14 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install --force
+
+COPY hardhat.config.js ./
+COPY scripts ./scripts
+COPY contracts ./contracts
+
+RUN npx hardhat compile
+
+CMD ["npx", "hardhat", "run", "scripts/deploy.js", "--network", "localhost"]

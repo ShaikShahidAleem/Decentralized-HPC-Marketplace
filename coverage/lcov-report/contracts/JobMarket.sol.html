@@ -1,0 +1,2066 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts\JobMarket.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> JobMarket.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">91.25% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>73/80</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">63% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>63/100</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">88% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>22/25</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">93.16% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>109/117</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line high'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443
+444
+445
+446
+447
+448
+449
+450
+451
+452
+453
+454
+455
+456
+457
+458
+459
+460
+461
+462
+463
+464
+465
+466
+467
+468
+469
+470
+471
+472
+473
+474
+475
+476
+477
+478
+479
+480
+481
+482
+483
+484
+485
+486
+487
+488
+489
+490
+491
+492
+493
+494
+495
+496
+497
+498
+499
+500
+501
+502
+503
+504
+505
+506
+507
+508
+509
+510
+511
+512
+513
+514
+515
+516
+517
+518
+519
+520
+521
+522
+523
+524
+525
+526
+527
+528
+529
+530
+531
+532
+533
+534
+535
+536
+537
+538
+539
+540
+541
+542
+543
+544
+545
+546
+547
+548
+549
+550
+551
+552
+553
+554
+555
+556
+557
+558
+559
+560
+561
+562
+563
+564
+565
+566
+567
+568
+569
+570
+571
+572
+573
+574
+575
+576
+577
+578
+579
+580
+581
+582
+583
+584
+585
+586
+587
+588
+589
+590
+591
+592
+593
+594
+595
+596
+597
+598
+599
+600
+601
+602
+603
+604
+605
+606
+607
+608
+609
+610
+611
+612
+613
+614
+615
+616
+617
+618
+619
+620
+621
+622
+623
+624
+625
+626
+627
+628
+629
+630
+631
+632
+633
+634
+635
+636
+637
+638
+639
+640
+641
+642
+643
+644
+645
+646
+647
+648
+649
+650
+651
+652
+653
+654
+655
+656
+657
+658
+659
+660
+661
+662
+663
+664
+665
+666
+667
+668</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">35×</span>
+<span class="cline-any cline-yes">34×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">72×</span>
+<span class="cline-any cline-yes">72×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">26×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">25×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">45×</span>
+<span class="cline-any cline-yes">45×</span>
+<span class="cline-any cline-yes">45×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">37×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">37×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">37×</span>
+<span class="cline-any cline-yes">37×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">37×</span>
+<span class="cline-any cline-yes">37×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">37×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">35×</span>
+<span class="cline-any cline-yes">34×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">33×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">33×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">33×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">33×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">25×</span>
+<span class="cline-any cline-yes">25×</span>
+<span class="cline-any cline-yes">25×</span>
+<span class="cline-any cline-yes">24×</span>
+<span class="cline-any cline-yes">23×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">22×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">22×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">22×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">19×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">5×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+&nbsp;
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "./Reputation.sol";
+import "./DisputeResolution.sol";
+&nbsp;
+/**
+ * @title JobMarket
+ * @author HPC Marketplace Team
+ * @notice Core marketplace contract for the decentralized HPC compute exchange.
+ * @dev Manages the complete lifecycle of compute jobs: posting, bidding, assignment,
+ *      execution, verification, payment release, and dispute escalation.
+ *
+ * Architecture:
+ *   - Uses a pull-over-push payment pattern with explicit escrow management
+ *   - ReentrancyGuard on all state-mutating functions that transfer ETH
+ *   - Integrates with Reputation contract for provider scoring
+ *   - Integrates with DisputeResolution for arbitration of contested jobs
+ *   - Compute tiers allow providers to advertise hardware capabilities
+ *
+ * Security Considerations:
+ *   - All external calls to transfer ETH use ReentrancyGuard (SWC-107)
+ *   - State changes occur BEFORE external calls (checks-effects-interactions)
+ *   - Integer overflow protection via Solidity ^0.8.20 built-in checks
+ */
+contract JobMarket is ReentrancyGuard {
+&nbsp;
+    // ============ Enums ============
+&nbsp;
+    /// @notice Lifecycle stages of a compute job
+    enum JobStatus {
+        Open,       // Job posted, accepting bids from providers
+        Assigned,   // Provider assigned, computation in progress
+        Completed,  // Result submitted by provider, awaiting client verification
+        Confirmed,  // Client confirmed result, payment released
+        Cancelled,  // Job cancelled by client (only from Open state)
+        Disputed    // Dispute raised, forwarded to DisputeResolution contract
+    }
+&nbsp;
+    /// @notice Hardware capability tiers for compute job categorization
+    /// @dev Providers declare their tier at staking time; clients specify required tier
+    enum ComputeTier {
+        CPU_STANDARD,   // General CPU workloads (data processing, compilation)
+        GPU_BASIC,      // Single GPU tasks (inference, light training)
+        GPU_PRO,        // Multi-GPU setups (distributed training, rendering)
+        HPC_CLUSTER     // Full HPC cluster access (molecular dynamics, CFD, etc.)
+    }
+&nbsp;
+    // ============ Structs ============
+&nbsp;
+    /// @notice Full specification of a compute job
+    struct Job {
+        uint256 id;
+        address client;
+        uint256 budget;               // Total budget locked in escrow (in wei)
+        uint256 deposit;              // Remaining deposited amount
+        JobStatus status;
+        address assignedProvider;
+        string dataHash;              // IPFS CID pointing to input dataset/configuration
+        string resultHash;            // IPFS CID pointing to computation output
+        uint256 createdAt;            // Block timestamp of job creation
+        uint256 deadline;             // Absolute deadline for result submission (unix timestamp)
+        string description;           // Human-readable job specification
+        ComputeTier requiredTier;     // Minimum hardware tier required
+        uint256 slaDeadline;          // SLA completion deadline (can differ from bidding deadline)
+    }
+&nbsp;
+    /// @notice A provider's bid on a specific job
+    struct Bid {
+        address provider;
+        uint256 amount;               // Bid price in wei
+        uint256 timestamp;
+        bool accepted;
+        uint256 estimatedDuration;    // Provider's estimated completion time (seconds)
+    }
+&nbsp;
+    /// @notice Provider profile with hardware capabilities
+    struct ProviderProfile {
+        ComputeTier tier;
+        uint256 cpuCores;
+        uint256 gpuVRAM;              // In MB
+        uint256 ramMB;
+        bool isRegistered;
+        uint256 registeredAt;
+    }
+&nbsp;
+    // ============ State Variables ============
+&nbsp;
+    uint256 public jobCounter;
+    uint256 public platformFeePercent = 2;        // 2% platform fee (basis: 100)
+    uint256 public maxPlatformFee = 10;            // Maximum configurable fee (10%)
+    address public owner;
+    Reputation public reputationContract;
+    DisputeResolution public disputeContract;
+&nbsp;
+    mapping(uint256 =&gt; Job) public jobs;
+    mapping(uint256 =&gt; Bid[]) public jobBids;
+    mapping(uint256 =&gt; mapping(address =&gt; bool)) public hasBid;
+&nbsp;
+    // Provider management
+    mapping(address =&gt; uint256) public providerStakes;
+    mapping(address =&gt; ProviderProfile) public providerProfiles;
+    uint256 public minimumStake = 0.01 ether;
+    uint256 public totalActiveProviders;
+&nbsp;
+    // Platform statistics
+    uint256 public totalVolumeProcessed;
+    uint256 public totalJobsCompleted;
+&nbsp;
+    // ============ Events ============
+&nbsp;
+    event JobPosted(
+        uint256 indexed jobId,
+        address indexed client,
+        uint256 budget,
+        string dataHash,
+        string description,
+        uint256 deadline,
+        ComputeTier requiredTier
+    );
+&nbsp;
+    event BidSubmitted(
+        uint256 indexed jobId,
+        address indexed provider,
+        uint256 amount,
+        uint256 estimatedDuration
+    );
+&nbsp;
+    event JobAssigned(
+        uint256 indexed jobId,
+        address indexed provider,
+        uint256 amount,
+        uint256 slaDeadline
+    );
+&nbsp;
+    event ResultSubmitted(
+        uint256 indexed jobId,
+        address indexed provider,
+        string resultHash
+    );
+&nbsp;
+    event JobCompleted(
+        uint256 indexed jobId,
+        address indexed client,
+        address indexed provider,
+        uint256 payment,
+        uint256 platformFee
+    );
+&nbsp;
+    event JobCancelled(
+        uint256 indexed jobId,
+        address indexed client,
+        uint256 refundAmount
+    );
+&nbsp;
+    event ProviderStaked(
+        address indexed provider,
+        uint256 amount,
+        ComputeTier tier
+    );
+&nbsp;
+    event ProviderUnstaked(
+        address indexed provider,
+        uint256 amount
+    );
+&nbsp;
+    event DisputeRaisedForJob(
+        uint256 indexed jobId,
+        address indexed client,
+        uint256 disputeId
+    );
+&nbsp;
+    event SLAViolation(
+        uint256 indexed jobId,
+        address indexed provider,
+        uint256 deadline
+    );
+&nbsp;
+    event PlatformFeeUpdated(
+        uint256 oldFee,
+        uint256 newFee,
+        address updatedBy
+    );
+&nbsp;
+    // ============ Modifiers ============
+&nbsp;
+    modifier onlyOwner() {
+        require(msg.sender == owner, "JobMarket: caller is not the owner");
+        _;
+    }
+&nbsp;
+    modifier onlyClient(uint256 _jobId) {
+        require(jobs[_jobId].client == msg.sender, "JobMarket: caller is not the job client");
+        _;
+    }
+&nbsp;
+    modifier onlyAssignedProvider(uint256 _jobId) {
+        require(
+            jobs[_jobId].assignedProvider == msg.sender,
+            "JobMarket: caller is not the assigned provider"
+        );
+        _;
+    }
+&nbsp;
+    modifier jobExists(uint256 _jobId) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_jobId &gt; 0 &amp;&amp; _jobId &lt;= jobCounter, "JobMarket: job does not exist");
+        _;
+    }
+&nbsp;
+    modifier isStakedProvider() {
+        require(
+            providerStakes[msg.sender] &gt;= minimumStake,
+            "JobMarket: provider must stake minimum amount"
+        );
+        _;
+    }
+&nbsp;
+    // ============ Constructor ============
+&nbsp;
+    /**
+     * @notice Deploys the marketplace and links supporting contracts.
+     * @param _reputationContract  Address of the deployed Reputation contract
+     * @param _disputeContract     Address of the deployed DisputeResolution contract
+     */
+    constructor(address _reputationContract, address _disputeContract) {
+        owner = msg.sender;
+        reputationContract = Reputation(_reputationContract);
+        disputeContract = DisputeResolution(_disputeContract);
+    }
+&nbsp;
+    // ============ Provider Management ============
+&nbsp;
+    /**
+     * @notice Registers the caller as a compute provider by staking ETH.
+     * @dev The provider must specify their hardware capability tier.
+     *      Multiple stake calls accumulate. The tier is set/updated with each call.
+     * @param _tier      Hardware capability tier the provider is advertising
+     * @param _cpuCores  Number of CPU cores available
+     * @param _gpuVRAM   GPU VRAM in MB (0 for CPU-only providers)
+     * @param _ramMB     Total RAM in MB
+     */
+    function stakeAsProvider(
+        ComputeTier _tier,
+        uint256 _cpuCores,
+        uint256 _gpuVRAM,
+        uint256 _ramMB
+    ) external payable {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.value &gt; 0, "JobMarket: must stake a non-zero amount");
+&nbsp;
+        bool isNew = !providerProfiles[msg.sender].isRegistered;
+&nbsp;
+        providerStakes[msg.sender] += msg.value;
+        providerProfiles[msg.sender] = ProviderProfile({
+            tier: _tier,
+            cpuCores: _cpuCores,
+            gpuVRAM: _gpuVRAM,
+            ramMB: _ramMB,
+            isRegistered: true,
+            registeredAt: isNew ? block.timestamp : providerProfiles[msg.sender].registeredAt
+        });
+&nbsp;
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (isNew) {
+            totalActiveProviders++;
+        }
+&nbsp;
+        emit ProviderStaked(msg.sender, msg.value, _tier);
+    }
+&nbsp;
+    /**
+     * @notice Withdraws staked ETH (only if provider has no active jobs).
+     * @param _amount Amount of ETH to withdraw (in wei)
+     */
+    function unstake(uint256 _amount) external <span class="missing-if-branch" title="else path not taken" >E</span>nonReentrant {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(providerStakes[msg.sender] &gt;= _amount, "JobMarket: insufficient stake balance");
+&nbsp;
+        providerStakes[msg.sender] -= _amount;
+&nbsp;
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (providerStakes[msg.sender] &lt; minimumStake &amp;&amp; providerProfiles[msg.sender].isRegistered) {
+            providerProfiles[msg.sender].isRegistered = false;
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (totalActiveProviders &gt; 0) {
+                totalActiveProviders--;
+            }
+        }
+&nbsp;
+        payable(msg.sender).transfer(_amount);
+        emit ProviderUnstaked(msg.sender, _amount);
+    }
+&nbsp;
+    // ============ Job Lifecycle ============
+&nbsp;
+    /**
+     * @notice Posts a new compute job with escrowed budget.
+     * @dev The entire msg.value is locked as escrow. The client specifies:
+     *      - Data reference (IPFS CID)
+     *      - Job description and requirements
+     *      - Bidding deadline
+     *      - Required hardware tier
+     * @param _dataHash     IPFS CID pointing to the input data/configuration
+     * @param _description  Human-readable job specification
+     * @param _deadline     Timestamp after which bidding closes
+     * @param _requiredTier Minimum hardware tier required for this job
+     * @return jobId        The newly created job's identifier
+     */
+    function postJob(
+        string calldata _dataHash,
+        string calldata _description,
+        uint256 _deadline,
+        ComputeTier _requiredTier
+    ) external payable returns (uint256) {
+        require(msg.value &gt; 0, "JobMarket: must deposit budget as escrow");
+        require(_deadline &gt; block.timestamp, "JobMarket: deadline must be in the future");
+&nbsp;
+        jobCounter++;
+&nbsp;
+        jobs[jobCounter] = Job({
+            id: jobCounter,
+            client: msg.sender,
+            budget: msg.value,
+            deposit: msg.value,
+            status: JobStatus.Open,
+            assignedProvider: address(0),
+            dataHash: _dataHash,
+            resultHash: "",
+            createdAt: block.timestamp,
+            deadline: _deadline,
+            description: _description,
+            requiredTier: _requiredTier,
+            slaDeadline: 0
+        });
+&nbsp;
+        emit JobPosted(
+            jobCounter,
+            msg.sender,
+            msg.value,
+            _dataHash,
+            _description,
+            _deadline,
+            _requiredTier
+        );
+&nbsp;
+        return jobCounter;
+    }
+&nbsp;
+    /**
+     * @notice Provider submits a competitive bid on an open job.
+     * @dev Requires the provider to be staked and the job to be open.
+     *      The provider's hardware tier must meet or exceed the job's requirement.
+     * @param _jobId             The job to bid on
+     * @param _amount            Bid price in wei (must not exceed job budget)
+     * @param _estimatedDuration Estimated completion time in seconds
+     */
+    function submitBid(
+        uint256 _jobId,
+        uint256 _amount,
+        uint256 _estimatedDuration
+    )
+        external
+        <span class="missing-if-branch" title="else path not taken" >E</span>jobExists(_jobId)
+        isStakedProvider
+    {
+        Job storage job = jobs[_jobId];
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(job.status == JobStatus.Open, "JobMarket: job is not open for bidding");
+        require(_amount &lt;= job.budget, "JobMarket: bid exceeds job budget");
+        require(!hasBid[_jobId][msg.sender], "JobMarket: provider already bid on this job");
+        require(
+            uint256(providerProfiles[msg.sender].tier) &gt;= uint256(job.requiredTier),
+            "JobMarket: provider tier insufficient for this job"
+        );
+&nbsp;
+        jobBids[_jobId].push(Bid({
+            provider: msg.sender,
+            amount: _amount,
+            timestamp: block.timestamp,
+            accepted: false,
+            estimatedDuration: _estimatedDuration
+        }));
+&nbsp;
+        hasBid[_jobId][msg.sender] = true;
+&nbsp;
+        emit BidSubmitted(_jobId, msg.sender, _amount, _estimatedDuration);
+    }
+&nbsp;
+    /**
+     * @notice Client accepts a provider's bid, assigning the job.
+     * @dev Sets the SLA deadline based on the provider's estimated duration.
+     *      Transitions the job from Open to Assigned.
+     * @param _jobId    The job whose bid is being accepted
+     * @param _provider The address of the provider whose bid to accept
+     */
+    function acceptBid(uint256 _jobId, address _provider)
+        external
+        <span class="missing-if-branch" title="else path not taken" >E</span>jobExists(_jobId)
+        onlyClient(_jobId)
+    {
+        Job storage job = jobs[_jobId];
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(job.status == JobStatus.Open, "JobMarket: job is not open");
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(hasBid[_jobId][_provider], "JobMarket: provider has not bid on this job");
+&nbsp;
+        // Find the accepted bid and set SLA deadline
+        Bid[] storage bids = jobBids[_jobId];
+        uint256 slaDeadline = block.timestamp + 24 hours; // Default SLA
+&nbsp;
+        for (uint256 i = 0; i &lt; bids.length; i++) {
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (bids[i].provider == _provider) {
+                bids[i].accepted = true;
+                // SLA = current time + estimated duration + 25% buffer
+                <span class="missing-if-branch" title="else path not taken" >E</span>if (bids[i].estimatedDuration &gt; 0) {
+                    slaDeadline = block.timestamp + bids[i].estimatedDuration + (bids[i].estimatedDuration / 4);
+                }
+                break;
+            }
+        }
+&nbsp;
+        job.status = JobStatus.Assigned;
+        job.assignedProvider = _provider;
+        job.slaDeadline = slaDeadline;
+&nbsp;
+        emit JobAssigned(_jobId, _provider, job.budget, slaDeadline);
+    }
+&nbsp;
+    /**
+     * @notice Provider submits the computation result.
+     * @dev Only the assigned provider can submit, and only while the job is Assigned.
+     *      The result is stored as an IPFS CID reference.
+     * @param _jobId      The job to submit results for
+     * @param _resultHash IPFS CID pointing to the computation output
+     */
+    function submitResult(uint256 _jobId, string calldata _resultHash)
+        external
+        <span class="missing-if-branch" title="else path not taken" >E</span>jobExists(_jobId)
+        onlyAssignedProvider(_jobId)
+    {
+        Job storage job = jobs[_jobId];
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(job.status == JobStatus.Assigned, "JobMarket: job is not in progress");
+&nbsp;
+        job.resultHash = _resultHash;
+        job.status = JobStatus.Completed;
+&nbsp;
+        emit ResultSubmitted(_jobId, msg.sender, _resultHash);
+    }
+&nbsp;
+    /**
+     * @notice Client confirms job completion, triggering payment release.
+     * @dev Distributes the escrowed funds: provider payment minus platform fee.
+     *      Updates the provider's reputation score and platform statistics.
+     *      Uses ReentrancyGuard to prevent reentrancy attacks (SWC-107).
+     * @param _jobId The job to confirm and pay for
+     */
+    function confirmCompletion(uint256 _jobId)
+        external
+        <span class="missing-if-branch" title="else path not taken" >E</span>jobExists(_jobId)
+        <span class="missing-if-branch" title="else path not taken" >E</span>onlyClient(_jobId)
+        <span class="missing-if-branch" title="else path not taken" >E</span>nonReentrant
+    {
+        Job storage job = jobs[_jobId];
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(job.status == JobStatus.Completed, "JobMarket: job result not yet submitted");
+&nbsp;
+        uint256 payment = job.deposit;
+        uint256 platformFee = (payment * platformFeePercent) / 100;
+        uint256 providerPayment = payment - platformFee;
+&nbsp;
+        // Effects before interactions (checks-effects-interactions pattern)
+        job.status = JobStatus.Confirmed;
+        job.deposit = 0;
+        totalVolumeProcessed += payment;
+        totalJobsCompleted++;
+&nbsp;
+        // Interactions
+        payable(job.assignedProvider).transfer(providerPayment);
+&nbsp;
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (platformFee &gt; 0) {
+            payable(owner).transfer(platformFee);
+        }
+&nbsp;
+        // Update reputation
+        reputationContract.incrementReputation(job.assignedProvider);
+&nbsp;
+        emit JobCompleted(_jobId, msg.sender, job.assignedProvider, providerPayment, platformFee);
+    }
+&nbsp;
+    /**
+     * @notice Client cancels an open job and receives a full refund.
+     * @dev Only jobs in Open status can be cancelled. The full deposit is returned.
+     * @param _jobId The job to cancel
+     */
+    function cancelJob(uint256 _jobId)
+        external
+        <span class="missing-if-branch" title="else path not taken" >E</span>jobExists(_jobId)
+        <span class="missing-if-branch" title="else path not taken" >E</span>onlyClient(_jobId)
+        <span class="missing-if-branch" title="else path not taken" >E</span>nonReentrant
+    {
+        Job storage job = jobs[_jobId];
+        require(job.status == JobStatus.Open, "JobMarket: can only cancel open jobs");
+&nbsp;
+        uint256 refund = job.deposit;
+        job.status = JobStatus.Cancelled;
+        job.deposit = 0;
+&nbsp;
+        payable(msg.sender).transfer(refund);
+&nbsp;
+        emit JobCancelled(_jobId, msg.sender, refund);
+    }
+&nbsp;
+    /**
+     * @notice Client raises a dispute for an assigned or completed job.
+     * @dev Transitions the job to Disputed status and creates a dispute entry
+     *      in the DisputeResolution contract. The provider's stake is at risk.
+     * @param _jobId The job to dispute
+     */
+    function raiseDispute(uint256 _jobId)
+        external
+        <span class="missing-if-branch" title="else path not taken" >E</span>jobExists(_jobId)
+        <span class="missing-if-branch" title="else path not taken" >E</span>onlyClient(_jobId)
+    {
+        Job storage job = jobs[_jobId];
+        require(
+            job.status == JobStatus.Assigned || <span class="branch-1 cbranch-no" title="branch not covered" >job.status == JobStatus.Completed</span>,
+            "JobMarket: can only dispute assigned or completed jobs"
+        );
+&nbsp;
+        job.status = JobStatus.Disputed;
+&nbsp;
+        uint256 stakeAtRisk = providerStakes[job.assignedProvider];
+        uint256 disputeId = disputeContract.raiseDispute(
+            _jobId,
+            msg.sender,
+            job.assignedProvider,
+            stakeAtRisk
+        );
+&nbsp;
+        emit DisputeRaisedForJob(_jobId, msg.sender, disputeId);
+    }
+&nbsp;
+    /**
+     * @notice Reports an SLA violation when a provider misses their deadline.
+     * @dev Can be called by anyone after the SLA deadline passes without result submission.
+     *      Currently logs the violation and decrements reputation; a production system
+     *      would also trigger automatic dispute escalation or partial refund.
+     * @param _jobId The job with the violated SLA
+     */
+<span class="fstat-no" title="function not covered" >    function reportSLAViolation(uint256 _jobId)</span>
+        external
+        jobExists(_jobId)
+    {
+<span class="cstat-no" title="statement not covered" >        Job storage job = jobs[_jobId];</span>
+<span class="cstat-no" title="statement not covered" >        require(job.status == JobStatus.Assigned, "JobMarket: job is not assigned")</span>;
+<span class="cstat-no" title="statement not covered" >        require(job.slaDeadline &gt; 0, "JobMarket: no SLA deadline set")</span>;
+<span class="cstat-no" title="statement not covered" >        require(block.timestamp &gt; job.slaDeadline, "JobMarket: SLA deadline has not passed")</span>;
+&nbsp;
+        // Penalize provider reputation
+<span class="cstat-no" title="statement not covered" >        reputationContract.decrementReputation(job.assignedProvider)</span>;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        emit SLAViolation(_jobId, job.assignedProvider, job.slaDeadline);</span>
+    }
+&nbsp;
+    // ============ Admin Functions ============
+&nbsp;
+    /**
+     * @notice Updates the platform fee percentage.
+     * @dev Fee cannot exceed `maxPlatformFee` (default 10%).
+     * @param _newFee New fee percentage (0–maxPlatformFee)
+     */
+    function setPlatformFee(uint256 _newFee) external onlyOwner {
+        require(_newFee &lt;= maxPlatformFee, "JobMarket: fee exceeds maximum");
+        uint256 oldFee = platformFeePercent;
+        platformFeePercent = _newFee;
+        emit PlatformFeeUpdated(oldFee, _newFee, msg.sender);
+    }
+&nbsp;
+    /**
+     * @notice Updates the minimum stake requirement for providers.
+     * @param _newMinimum New minimum stake in wei
+     */
+<span class="fstat-no" title="function not covered" >    function setMinimumStake(uint256 _newMinimum) external onlyOwner {</span>
+        minimumStake = _newMinimum;
+    }
+&nbsp;
+    // ============ View Functions ============
+&nbsp;
+    /**
+     * @notice Retrieves the full job specification.
+     * @param _jobId The job identifier
+     * @return The Job struct
+     */
+    function getJob(uint256 _jobId) external view returns (Job memory) {
+        return jobs[_jobId];
+    }
+&nbsp;
+    /**
+     * @notice Returns all bids submitted for a specific job.
+     * @param _jobId The job identifier
+     * @return Array of Bid structs
+     */
+<span class="fstat-no" title="function not covered" >    function getJobBids(uint256 _jobId) external view returns (Bid[] memory) {</span>
+<span class="cstat-no" title="statement not covered" >        return jobBids[_jobId];</span>
+    }
+&nbsp;
+    /**
+     * @notice Returns all currently open jobs in the marketplace.
+     * @dev Iterates through all jobs — gas cost scales linearly with total job count.
+     *      Production would use off-chain indexing (e.g., The Graph) instead.
+     * @return Array of Job structs with Open status
+     */
+    function getOpenJobs() external view returns (Job[] memory) {
+        uint256 openCount = 0;
+        for (uint256 i = 1; i &lt;= jobCounter; i++) {
+            if (jobs[i].status == JobStatus.Open) {
+                openCount++;
+            }
+        }
+&nbsp;
+        Job[] memory openJobs = new Job[](openCount);
+        uint256 index = 0;
+        for (uint256 i = 1; i &lt;= jobCounter; i++) {
+            if (jobs[i].status == JobStatus.Open) {
+                openJobs[index] = jobs[i];
+                index++;
+            }
+        }
+&nbsp;
+        return openJobs;
+    }
+&nbsp;
+    /**
+     * @notice Checks whether a provider meets the minimum stake requirement.
+     * @param _provider Address to check
+     * @return True if the provider has staked at least `minimumStake`
+     */
+    function isStaked(address _provider) external view returns (bool) {
+        return providerStakes[_provider] &gt;= minimumStake;
+    }
+&nbsp;
+    /**
+     * @notice Returns the staked amount for a provider.
+     * @param _provider Address to query
+     * @return Staked amount in wei
+     */
+    function getStake(address _provider) external view returns (uint256) {
+        return providerStakes[_provider];
+    }
+&nbsp;
+    /**
+     * @notice Returns the provider's registered hardware profile.
+     * @param _provider Address to query
+     * @return The ProviderProfile struct
+     */
+    function getProviderProfile(address _provider) external view returns (ProviderProfile memory) {
+        return providerProfiles[_provider];
+    }
+&nbsp;
+    /**
+     * @notice Returns aggregate marketplace statistics.
+     * @return _totalJobs       Total jobs ever posted
+     * @return _completedJobs   Total jobs successfully completed
+     * @return _activeProviders Number of currently staked providers
+     * @return _totalVolume     Cumulative ETH processed through the marketplace
+     */
+    function getMarketStats() external view returns (
+        uint256 _totalJobs,
+        uint256 _completedJobs,
+        uint256 _activeProviders,
+        uint256 _totalVolume
+    ) {
+        return (jobCounter, totalJobsCompleted, totalActiveProviders, totalVolumeProcessed);
+    }
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sun Feb 22 2026 03:34:32 GMT+0530 (India Standard Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

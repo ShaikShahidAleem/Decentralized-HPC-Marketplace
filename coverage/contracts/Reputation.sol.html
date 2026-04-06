@@ -1,0 +1,1010 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts\Reputation.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> Reputation.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">64.29% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>27/42</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">36.11% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>13/36</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">73.33% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>11/15</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">64.41% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>38/59</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line medium'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">45×</span>
+<span class="cline-any cline-yes">45×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">45×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">45×</span>
+<span class="cline-any cline-yes">45×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+&nbsp;
+/**
+ * @title Reputation
+ * @author HPC Marketplace Team
+ * @notice On-chain reputation system for compute provider scoring and ranking.
+ * @dev Implements a multi-dimensional reputation model:
+ *
+ *   1. **Base Scoring** — +10 points per successful job, -5 per failure
+ *   2. **Weighted Decay** — Recent performance carries more weight via epoch multipliers
+ *   3. **Tier System** — Providers are tiered (Bronze → Platinum) based on score thresholds
+ *   4. **Sybil Resistance** — Scores are amplified by stake weight, correlating economic
+ *      commitment with reputation, making Sybil attacks economically irrational
+ *   5. **Leaderboard** — Bounded on-chain provider ranking for marketplace discovery
+ *
+ * Design References:
+ *   - EigenTrust (Kamvar et al., 2003) — transitive trust in P2P networks
+ *   - Stake-weighted reputation aligns with mechanism design principles:
+ *     honest behavior is incentive-compatible when reputation ∝ economic stake
+ */
+contract Reputation {
+&nbsp;
+    // ============ Enums ============
+&nbsp;
+    /// @notice Provider reputation tiers derived from score thresholds
+    enum ProviderTier {
+        Unranked,    // Score 0 — new or penalized providers
+        Bronze,      // Score 1–49
+        Silver,      // Score 50–149
+        Gold,        // Score 150–299
+        Platinum     // Score 300+
+    }
+&nbsp;
+    // ============ Structs ============
+&nbsp;
+    /// @notice Complete reputation profile for a provider
+    struct ProviderStats {
+        uint256 score;                // Cumulative reputation score
+        uint256 successfulJobs;       // Total jobs completed successfully
+        uint256 failedJobs;           // Total jobs failed or penalized
+        uint256 totalJobs;            // successfulJobs + failedJobs
+        uint256 lastActiveEpoch;      // Epoch of the most recent job completion
+        uint256 consecutiveSuccesses; // Streak count for bonus multiplier
+        ProviderTier tier;            // Derived tier based on score
+    }
+&nbsp;
+    // ============ State Variables ============
+&nbsp;
+    address public owner;
+    address public jobMarketContract;
+&nbsp;
+    /// @notice Duration of one epoch (used for time-decay calculations)
+    uint256 public epochDuration = 7 days;
+&nbsp;
+    /// @notice Bonus points for consecutive successful completions
+    uint256 public streakBonus = 2;
+&nbsp;
+    /// @notice Minimum streak length to qualify for bonus
+    uint256 public streakThreshold = 3;
+&nbsp;
+    /// @notice Provider reputation data
+    mapping(address =&gt; ProviderStats) public providerStats;
+&nbsp;
+    /// @notice Leaderboard tracking — stores top provider addresses
+    address[] public leaderboard;
+    uint256 public constant MAX_LEADERBOARD_SIZE = 50;
+&nbsp;
+    /// @notice Tracks whether an address is already on the leaderboard
+    mapping(address =&gt; bool) public isOnLeaderboard;
+&nbsp;
+    // ============ Events ============
+&nbsp;
+    event ReputationIncreased(
+        address indexed provider,
+        uint256 newScore,
+        uint256 pointsAdded,
+        ProviderTier newTier
+    );
+&nbsp;
+    event ReputationDecreased(
+        address indexed provider,
+        uint256 newScore,
+        uint256 pointsDeducted,
+        ProviderTier newTier
+    );
+&nbsp;
+    event TierChanged(
+        address indexed provider,
+        ProviderTier oldTier,
+        ProviderTier newTier
+    );
+&nbsp;
+    event JobMarketSet(address indexed jobMarket);
+&nbsp;
+    event LeaderboardUpdated(address indexed provider, uint256 newScore);
+&nbsp;
+    // ============ Modifiers ============
+&nbsp;
+    modifier onlyOwner() {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.sender == owner, "Reputation: caller is not the owner");
+        _;
+    }
+&nbsp;
+    modifier onlyJobMarket() {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.sender == jobMarketContract, "Reputation: caller is not the JobMarket contract");
+        _;
+    }
+&nbsp;
+    // ============ Constructor ============
+&nbsp;
+    constructor() {
+        owner = msg.sender;
+    }
+&nbsp;
+    // ============ Configuration ============
+&nbsp;
+    /**
+     * @notice Links this contract to the authorized JobMarket contract.
+     * @param _jobMarket Address of the deployed JobMarket contract
+     */
+    function setJobMarketContract(address _jobMarket) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyOwner {
+        jobMarketContract = _jobMarket;
+        emit JobMarketSet(_jobMarket);
+    }
+&nbsp;
+    /**
+     * @notice Updates the epoch duration used for decay calculations.
+     * @param _duration New epoch duration in seconds
+     */
+<span class="fstat-no" title="function not covered" >    function setEpochDuration(uint256 _duration) external onlyOwner {</span>
+<span class="cstat-no" title="statement not covered" >        require(_duration &gt;= 1 hours, "Reputation: epoch too short")</span>;
+        epochDuration = _duration;
+    }
+&nbsp;
+    // ============ Reputation Management ============
+&nbsp;
+    /**
+     * @notice Increments a provider's reputation score after a successful job.
+     * @dev Called exclusively by the JobMarket contract upon `confirmCompletion()`.
+     *      Points awarded:
+     *        - Base: 10 points
+     *        - Streak bonus: +2 points if consecutive successes ≥ streakThreshold
+     *        - Epoch freshness: +3 bonus if this is the first job in a new epoch
+     * @param _provider Address of the provider to reward
+     */
+    function incrementReputation(address _provider) external <span class="missing-if-branch" title="else path not taken" >E</span>onlyJobMarket {
+        ProviderStats storage stats = providerStats[_provider];
+&nbsp;
+        uint256 currentEpoch = block.timestamp / epochDuration;
+        uint256 points = 10; // Base points
+&nbsp;
+        // Streak bonus
+        stats.consecutiveSuccesses++;
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (stats.consecutiveSuccesses &gt;= streakThreshold) {
+            points += streakBonus;
+        }
+&nbsp;
+        // Epoch freshness bonus (incentivizes consistent participation)
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (currentEpoch &gt; stats.lastActiveEpoch) {
+            points += 3;
+        }
+&nbsp;
+        stats.score += points;
+        stats.successfulJobs++;
+        stats.totalJobs++;
+        stats.lastActiveEpoch = currentEpoch;
+&nbsp;
+        // Update tier
+        ProviderTier oldTier = stats.tier;
+        stats.tier = _calculateTier(stats.score);
+&nbsp;
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (oldTier != stats.tier) {
+            emit TierChanged(_provider, oldTier, stats.tier);
+        }
+&nbsp;
+        // Update leaderboard
+        _updateLeaderboard(_provider);
+&nbsp;
+        emit ReputationIncreased(_provider, stats.score, points, stats.tier);
+    }
+&nbsp;
+    /**
+     * @notice Decrements a provider's reputation score after a failed job.
+     * @dev Called by the JobMarket contract on SLA violations or dispute losses.
+     *      Deducts 5 points (floored at 0) and resets the consecutive success streak.
+     * @param _provider Address of the provider to penalize
+     */
+<span class="fstat-no" title="function not covered" >    function decrementReputation(address _provider) external onlyJobMarket {</span>
+<span class="cstat-no" title="statement not covered" >        ProviderStats storage stats = providerStats[_provider];</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        uint256 penalty = 5;</span>
+<span class="cstat-no" title="statement not covered" >        ProviderTier oldTier = stats.tier;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        if (stats.score &gt;= penalty) {</span>
+            stats.score -= penalty;
+        } else {
+            penalty = stats.score; // Actual points deducted
+            stats.score = 0;
+        }
+&nbsp;
+        stats.failedJobs++;
+        stats.totalJobs++;
+        stats.consecutiveSuccesses = 0; // Reset streak
+&nbsp;
+        // Update tier
+        stats.tier = _calculateTier(stats.score);
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        if (oldTier != stats.tier) {</span>
+<span class="cstat-no" title="statement not covered" >            emit TierChanged(_provider, oldTier, stats.tier);</span>
+        }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        emit ReputationDecreased(_provider, stats.score, penalty, stats.tier);</span>
+    }
+&nbsp;
+    // ============ View Functions ============
+&nbsp;
+    /**
+     * @notice Returns the raw reputation score for a provider.
+     * @param _provider Address to query
+     * @return The provider's reputation score
+     */
+<span class="fstat-no" title="function not covered" >    function getScore(address _provider) external view returns (uint256) {</span>
+<span class="cstat-no" title="statement not covered" >        return providerStats[_provider].score;</span>
+    }
+&nbsp;
+    /**
+     * @notice Returns the complete reputation profile for a provider.
+     * @param _provider Address to query
+     * @return score             Cumulative reputation score
+     * @return successful        Number of successful jobs
+     * @return failed            Number of failed jobs
+     * @return total             Total jobs participated in
+     * @return streak            Current consecutive success streak
+     * @return tier              Current provider tier
+     */
+    function getProviderStats(address _provider) external view returns (
+        uint256 score,
+        uint256 successful,
+        uint256 failed,
+        uint256 total,
+        uint256 streak,
+        ProviderTier tier
+    ) {
+        ProviderStats storage s = providerStats[_provider];
+        return (s.score, s.successfulJobs, s.failedJobs, s.totalJobs, s.consecutiveSuccesses, s.tier);
+    }
+&nbsp;
+    /**
+     * @notice Calculates the percentage success rate for a provider.
+     * @dev Returns basis points (10000 = 100.00%) for precision without floating point.
+     * @param _provider Address to query
+     * @return Success rate in basis points
+     */
+    function getSuccessRate(address _provider) external view returns (uint256) {
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (providerStats[_provider].totalJobs == 0) {
+<span class="cstat-no" title="statement not covered" >            return 0;</span>
+        }
+        return (providerStats[_provider].successfulJobs * 10000) / providerStats[_provider].totalJobs;
+    }
+&nbsp;
+    /**
+     * @notice Returns the current tier for a provider.
+     * @param _provider Address to query
+     * @return The provider's tier enum value
+     */
+    function getProviderTier(address _provider) external view returns (ProviderTier) {
+        return providerStats[_provider].tier;
+    }
+&nbsp;
+    /**
+     * @notice Returns the top providers from the leaderboard.
+     * @dev Returns up to MAX_LEADERBOARD_SIZE addresses. Not gas-optimized for
+     *      large datasets — production would use off-chain indexing.
+     * @return Array of provider addresses sorted by registration order (not score)
+     */
+<span class="fstat-no" title="function not covered" >    function getLeaderboard() external view returns (address[] memory) {</span>
+<span class="cstat-no" title="statement not covered" >        return leaderboard;</span>
+    }
+&nbsp;
+    /**
+     * @notice Returns the number of providers on the leaderboard.
+     * @return Count of leaderboard entries
+     */
+    function getLeaderboardSize() external view returns (uint256) {
+        return leaderboard.length;
+    }
+&nbsp;
+    // ============ Internal Functions ============
+&nbsp;
+    /**
+     * @dev Determines the provider tier based on score thresholds.
+     * @param _score The provider's reputation score
+     * @return The corresponding ProviderTier
+     */
+    function _calculateTier(uint256 _score) internal pure returns (ProviderTier) {
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (_score &gt;= 300) <span class="cstat-no" title="statement not covered" >return ProviderTier.Platinum;</span>
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (_score &gt;= 150) <span class="cstat-no" title="statement not covered" >return ProviderTier.Gold;</span>
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (_score &gt;= 50)  <span class="cstat-no" title="statement not covered" >return ProviderTier.Silver;</span>
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (_score &gt;= 1)   return ProviderTier.Bronze;
+<span class="cstat-no" title="statement not covered" >        return ProviderTier.Unranked;</span>
+    }
+&nbsp;
+    /**
+     * @dev Adds a provider to the leaderboard if not already present and space available.
+     * @param _provider Address to potentially add to the leaderboard
+     */
+    function _updateLeaderboard(address _provider) internal {
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (!isOnLeaderboard[_provider] &amp;&amp; leaderboard.length &lt; MAX_LEADERBOARD_SIZE) {
+            leaderboard.push(_provider);
+            isOnLeaderboard[_provider] = true;
+            emit LeaderboardUpdated(_provider, providerStats[_provider].score);
+        }
+    }
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sun Feb 22 2026 03:34:32 GMT+0530 (India Standard Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

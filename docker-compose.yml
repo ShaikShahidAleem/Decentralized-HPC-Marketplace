@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  # Local Ethereum blockchain (Hardhat node)
+  blockchain:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.blockchain
+    ports:
+      - "8545:8545"
+    volumes:
+      - ./contracts:/app/contracts
+      - ./scripts:/app/scripts
+      - ./artifacts:/app/artifacts
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8545"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Deploy contracts after blockchain is ready
+  deployer:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.deployer
+    depends_on:
+      blockchain:
+        condition: service_healthy
+    volumes:
+      - ./client:/app/client
+      - ./provider:/app/provider
+      - ./artifacts:/app/artifacts
+    environment:
+      - NETWORK_URL=http://blockchain:8545
+
+  # Provider node 1
+  provider1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.provider
+    depends_on:
+      deployer:
+        condition: service_completed_successfully
+    volumes:
+      - ./provider:/app/provider
+      - ./artifacts:/app/artifacts
+    environment:
+      - NETWORK_URL=http://blockchain:8545
+      - ACCOUNT_INDEX=1
+      - PROVIDER_NAME=Provider-1
+
+  # Provider node 2
+  provider2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.provider
+    depends_on:
+      deployer:
+        condition: service_completed_successfully
+    volumes:
+      - ./provider:/app/provider
+      - ./artifacts:/app/artifacts
+    environment:
+      - NETWORK_URL=http://blockchain:8545
+      - ACCOUNT_INDEX=2
+      - PROVIDER_NAME=Provider-2
+
+  # Provider node 3
+  provider3:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.provider
+    depends_on:
+      deployer:
+        condition: service_completed_successfully
+    volumes:
+      - ./provider:/app/provider
+      - ./artifacts:/app/artifacts
+    environment:
+      - NETWORK_URL=http://blockchain:8545
+      - ACCOUNT_INDEX=3
+      - PROVIDER_NAME=Provider-3
+
+  # Client web interface
+  client:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.client
+    ports:
+      - "3000:3000"
+    depends_on:
+      deployer:
+        condition: service_completed_successfully
+    volumes:
+      - ./client:/app/client
+
+networks:
+  default:
+    name: hpc-marketplace
