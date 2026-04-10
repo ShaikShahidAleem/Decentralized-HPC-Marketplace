@@ -116,7 +116,7 @@ The **DAO hack (2016)** demonstrated the criticality of reentrancy protection. W
 | **Akash** | Container marketplace | Cosmos SDK | Cloud deployment |
 | **Render** | GPU rendering | Proprietary | 3D rendering |
 | **iExec** | TEE-based compute | Ethereum L1 + PoCo | Confidential compute |
-| **This Project** | Auction + DAO + Reputation | Hardhat (prototype) | Academic research |
+| **This Project** | Auction + DAO + Reputation | Hardhat (simulation) | Academic Project |
 
 ### Differentiation
 

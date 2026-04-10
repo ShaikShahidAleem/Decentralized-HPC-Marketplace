@@ -1,6 +1,6 @@
 # Architecture — Decentralized HPC Marketplace
 
-> A blockchain-based compute marketplace using mechanism design, DAO governance, and reputation systems to coordinate trustless high-performance computing.
+> A simulation architectural design for a blockchain-based compute marketplace using mechanism design, DAO governance, and reputation systems to coordinate trustless high-performance computing at a prototype scale.
 
 ---
 
