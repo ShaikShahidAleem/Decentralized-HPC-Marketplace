@@ -114,26 +114,46 @@
                                 <rect x="2" y="6" width="20" height="12" rx="2" />
                                 <path d="M22 10h-4a2 2 0 0 0 0 4h4" />
                             </svg>
-                            Connect Wallet
+                            Sign In
                         </button>
-                        <div id="connect-menu" class="dropdown-menu glass-panel" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 0.5rem; min-width: 250px; z-index: 100; flex-direction: column; gap: 0.5rem; padding: 0.5rem;">
+                        <div id="connect-menu" class="dropdown-menu glass-panel" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 0.5rem; min-width: 250px; z-index: 1000; flex-direction: column; gap: 0.5rem; padding: 0.5rem; background: var(--bg-panel); border: 1px solid var(--border-light); box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
                             <button class="btn btn-outline" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('metamask')">🦊 MetaMask</button>
                             <hr style="border-color: var(--border-light); margin: 4px 0;">
                             <div style="display: flex; flex-direction: column; gap: 4px; padding: 4px;">
                                 <label style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Custom RPC URL</label>
                                 <input type="text" id="custom-rpc-url" value="http://127.0.0.1:8545" class="input-field" style="font-family: var(--mono); font-size: 11px; padding: 6px; display: none;">
-                                <label style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin-top: 8px;">Select Wallet Profile</label>
-                                <button class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local', 0)">💳 Account 1 (Deployer)</button>
-                                <button class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local', 1)">💳 Account 2 (Client A)</button>
-                                <button class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local', 2)">💳 Account 3 (Provider A)</button>
-                                <button class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local', 3)">💳 Account 4 (Client B)</button>
-                                <button class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local', 4)">💳 Account 5 (Provider B)</button>
+                                <label style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin-top: 8px;">Simulate User Login</label>
+                                <button class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local', 1)">👤 User 1 (Client)</button>
+                                <button class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local', 2)">⚙️ User 2 (Provider)</button>
+                                <button class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local', 3)">👤 User 3 (Client)</button>
+                                <button class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local', 4)">⚙️ User 4 (Provider)</button>
+                                <button class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local', 0)">👑 Admin (Deployer)</button>
                             </div>
                         </div>
                     </div>
-                    <div id="wallet-info" style="display:none;" class="wallet-info">
-                        <span id="wallet-balance" class="wallet-balance">0 ETH</span>
-                        <span id="wallet-address" class="wallet-address">0x</span>
+                    <div id="wallet-info" style="display:none; align-items:center;" class="wallet-info">
+                        <span id="wallet-balance" class="wallet-balance" style="margin-right: 12px;">0 ETH</span>
+                        
+                        <!-- User Profile Dropdown -->
+                        <div class="profile-dropdown" style="position: relative; display: inline-block;">
+                            <button id="btn-profile" class="btn btn-outline" onclick="toggleProfileMenu()" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="8" r="4"/>
+                                    <path d="M18 21v-2a4 4 0 0 0-4-4H10a4 4 0 0 0-4 4v2"/>
+                                </svg>
+                                <span id="wallet-address" class="wallet-address" style="margin:0; background:none; padding:0;">0x</span>
+                            </button>
+                            <div id="profile-menu" class="dropdown-menu glass-panel" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 0.5rem; min-width: 150px; z-index: 1000; flex-direction: column; gap: 0.5rem; padding: 0.5rem; background: var(--bg-panel); border: 1px solid var(--border-light); box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+                                <button class="btn btn-danger btn-sm" style="width: 100%; justify-content: flex-start;" onclick="signOut()">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                        <polyline points="16 17 21 12 16 7"/>
+                                        <line x1="21" y1="12" x2="9" y2="12"/>
+                                    </svg>
+                                    Sign Out
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -393,17 +413,33 @@ print("---------------------------")
                 </section>
             </div>
 
-            <!-- Terminal -->
-            <div class="terminal-panel glass-panel">
-                <div class="terminal-header">
-                    <span class="terminal-title">System Log</span>
-                    <div class="terminal-dots">
-                        <span class="dot red"></span>
-                        <span class="dot yellow"></span>
-                        <span class="dot green"></span>
+            <!-- Bottom Panels Container -->
+            <div style="display: flex; gap: 1rem; padding: 0 1rem 1rem 1rem; height: 200px;">
+                <!-- Terminal -->
+                <div class="terminal-panel glass-panel" style="flex: 1; margin: 0; height: 100%;">
+                    <div class="terminal-header">
+                        <span class="terminal-title">System Log</span>
+                        <div class="terminal-dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
                     </div>
+                    <div id="terminal-output" class="terminal-output custom-scroll" style="height: calc(100% - 32px);"></div>
                 </div>
-                <div id="terminal-output" class="terminal-output custom-scroll"></div>
+
+                <!-- Blockchain Insight Panel -->
+                <div class="terminal-panel glass-panel" style="flex: 1; margin: 0; height: 100%;">
+                    <div class="terminal-header">
+                        <span class="terminal-title">Blockchain Insight Panel</span>
+                        <div class="terminal-dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                    </div>
+                    <div id="blockchain-insight-output" class="terminal-output custom-scroll" style="height: calc(100% - 32px);"></div>
+                </div>
             </div>
         </main>
 

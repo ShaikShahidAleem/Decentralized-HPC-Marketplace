@@ -41,7 +41,8 @@ const JOB_MARKET_ABI = [
     "function getProviderProfile(address _provider) view returns (tuple(uint8 tier, uint256 cpuCores, uint256 gpuVRAM, uint256 ramMB, bool isRegistered, uint256 registeredAt))",
     "function getMarketStats() view returns (uint256, uint256, uint256, uint256)",
     "function jobCounter() view returns (uint256)",
-    "function platformFeePercent() view returns (uint256)"
+    "function platformFeePercent() view returns (uint256)",
+    "function minimumStake() view returns (uint256)"
 ];
 
 const REPUTATION_ABI = [

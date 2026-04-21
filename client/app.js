@@ -14,6 +14,17 @@ let jobMarketContract, reputationContract, disputeContract, governanceContract;
 let currentView = "dashboard";
 window.liveJobLogs = {}; // Store live task execution logs
 let currentSlideOverJobId = null;
+let currentRole = "CLIENT"; // Explicit role selection
+
+const PROVIDER_REGISTRY = {
+    // Hardhat test addresses (standard list)
+    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266": 4000, // Account 1
+    "0x70997970C51812dc3A010C7d01b50e0d17dc79C8": 4001, // Account 2
+    "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC": 4002, // Account 3
+    "0x90F79bf6EB2c4f870365E785982E1f101E93b906": 4003, // Account 4
+    "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65": 4004  // Account 5
+};
+
 const STATUS_MAP = ["Open", "Assigned", "Completed", "Confirmed", "Cancelled", "Disputed"];
 const STATUS_CLASS = ["status-open", "status-assigned", "status-completed", "status-confirmed", "status-cancelled", "status-disputed"];
 const TIER_NAMES = ["CPU Standard", "GPU Basic", "GPU Pro", "HPC Cluster"];
@@ -99,7 +110,19 @@ async function initWeb3(method = 'metamask') {
         const balance = await provider.getBalance(userAddress);
         document.getElementById("wallet-balance").textContent = parseFloat(ethers.formatEther(balance)).toFixed(4) + " ETH";
 
-        systemLog(`Connected: ${addrShort}`, "success");
+        // Auto-assign role based on wallet index if using local simulation
+        if (method === 'local') {
+            const index = arguments.length > 1 ? arguments[1] : 0;
+            if (index === 2 || index === 4) {
+                currentRole = 'PROVIDER';
+            } else {
+                currentRole = 'CLIENT';
+            }
+        } else {
+            currentRole = 'CLIENT'; // Default for metamask
+        }
+
+        systemLog(`Connected: ${addrShort} as ${currentRole}`, "success");
         await refreshData();
 
         // Subscribe to real-time events
@@ -107,6 +130,38 @@ async function initWeb3(method = 'metamask') {
     } catch (err) {
         systemLog("Connection failed: " + err.message, "error");
     }
+}
+
+function toggleProfileMenu() {
+    const menu = document.getElementById('profile-menu');
+    menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+}
+
+function signOut() {
+    document.getElementById('profile-menu').style.display = 'none';
+    document.getElementById("wallet-info").style.display = "none";
+    document.querySelector(".connect-dropdown").style.display = "inline-block";
+    provider = null;
+    signer = null;
+    userAddress = null;
+    jobMarketContract = null;
+    systemLog("Signed out successfully", "info");
+    document.getElementById("view-title").textContent = "Signed Out";
+}
+
+function blockchainLog(contract, func, event) {
+    const panel = document.getElementById("blockchain-insight-output");
+    if (!panel || !event) return;
+    
+    let txHash = event.transactionHash || (event.log && event.log.transactionHash) || "0x00...00";
+    let blockNumber = event.blockNumber || (event.log && event.log.blockNumber) || "Pending";
+    
+    const time = new Date().toLocaleTimeString();
+    const entry = document.createElement("div");
+    entry.className = `log-entry`;
+    entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="mono" style="color:var(--primary)">${contract}</span>.<span class="mono" style="color:var(--info)">${func}</span> <span class="mono" style="color:var(--text-muted); font-size:10px;" title="${txHash}">${txHash.slice(0,10)}...</span> <span style="color:var(--success); font-size:10px;">Blk:${blockNumber}</span>`;
+    panel.appendChild(entry);
+    panel.scrollTop = panel.scrollHeight;
 }
 
 function showActivityLog() {
@@ -128,7 +183,10 @@ function renderActivityLog() {
 function subscribeToEvents() {
     if (!jobMarketContract) return;
 
-    jobMarketContract.on("JobPosted", (jobId, client, budget, dataHash, description) => {
+    jobMarketContract.on("JobPosted", (jobId, client, budget, dataHash, description, deadline, requiredTier, event) => {
+        // Fallback for different parameter counts based on ABI matches
+        let ev = arguments[arguments.length - 1];
+        blockchainLog("JobMarket", "postJob", ev);
         const stage = JSON.stringify({ type: "action", title: "Job Posted", badge: "Job", steps: [
             `Job #${jobId}`,
             `Budget: ${ethers.formatEther(budget)} ETH`
@@ -138,7 +196,9 @@ function subscribeToEvents() {
         refreshData();
     });
 
-    jobMarketContract.on("BidSubmitted", (jobId, provider, amount, estimatedDuration) => {
+    jobMarketContract.on("BidSubmitted", (jobId, provider, amount, estimatedDuration, event) => {
+        let ev = arguments[arguments.length - 1];
+        blockchainLog("JobMarket", "submitBid", ev);
         const stage = JSON.stringify({ type: "action", title: "Bid Submitted", badge: "Bid", steps: [
             `Job #${jobId}`,
             `Provider: ${provider.slice(0,8)}...`,
@@ -152,7 +212,9 @@ function subscribeToEvents() {
         }
     });
 
-    jobMarketContract.on("JobAssigned", (jobId, provider, amount) => {
+    jobMarketContract.on("JobAssigned", (jobId, provider, amount, slaDeadline, event) => {
+        let ev = arguments[arguments.length - 1];
+        blockchainLog("JobMarket", "acceptBid", ev);
         const stage = JSON.stringify({ type: "action", title: "Job Assigned", badge: "Job", steps: [
             `Job #${jobId}`,
             `Provider: ${provider.slice(0,8)}...`,
@@ -163,17 +225,23 @@ function subscribeToEvents() {
         refreshData();
     });
 
-    jobMarketContract.on("JobCompleted", (jobId, client, provider, payment) => {
+    jobMarketContract.on("JobCompleted", (jobId, client, provider, payment, platformFee, event) => {
+        let ev = arguments[arguments.length - 1];
+        blockchainLog("JobMarket", "confirmCompletion", ev);
         systemLog(`Job #${jobId} completed — ${ethers.formatEther(payment)} ETH paid`, "success");
         refreshData();
     });
 
-    jobMarketContract.on("DisputeRaisedForJob", (jobId, client, disputeId) => {
+    jobMarketContract.on("DisputeRaisedForJob", (jobId, client, disputeId, event) => {
+        let ev = arguments[arguments.length - 1];
+        blockchainLog("JobMarket", "raiseDispute", ev);
         systemLog(`⚠️ Dispute #${disputeId} raised for job #${jobId}`, "warning");
         refreshData();
     });
 
-    jobMarketContract.on("ResultSubmitted", (jobId, provider, resultHash) => {
+    jobMarketContract.on("ResultSubmitted", (jobId, provider, resultHash, event) => {
+        let ev = arguments[arguments.length - 1];
+        blockchainLog("JobMarket", "submitResult", ev);
         const stage = JSON.stringify({ type: "action", title: "Result Submitted", badge: "Result", steps: [
             `Job #${jobId}`,
             `Provider: ${provider.slice(0,8)}...`
@@ -183,7 +251,9 @@ function subscribeToEvents() {
         refreshData();
     });
 
-    jobMarketContract.on("JobProgress", (jobId, stage) => {
+    jobMarketContract.on("JobProgress", (jobId, stage, event) => {
+        let ev = arguments[arguments.length - 1];
+        blockchainLog("JobMarket", "reportProgress", ev);
         activityLogs.push({ stage, time: Date.now() });
         const id = Number(jobId);
         if (!window.liveJobLogs[id]) window.liveJobLogs[id] = [];
@@ -347,6 +417,17 @@ async function showJobDetail(jobId) {
         
         currentSlideOverJobId = Number(jobId);
 
+        let isMLPipeline = false;
+        let jobMeta = { jobType: "GENERIC" };
+        let displayDesc = job.description;
+        try {
+            jobMeta = JSON.parse(job.description);
+            if (jobMeta.jobType === "ML_PIPELINE") {
+                isMLPipeline = true;
+                displayDesc = jobMeta.text || "ML Training Task";
+            }
+        } catch(e) {}
+
         let detailHTML = `
             <div class="detail-header">
                 <h3>Job #${Number(job.id)}</h3>
@@ -397,9 +478,88 @@ async function showJobDetail(jobId) {
 
             <div class="detail-description">
                 <label>Description</label>
-                <p>${escapeHtml(job.description)}</p>
+                <p>${escapeHtml(displayDesc)}</p>
             </div>
         `;
+
+        if (isMLPipeline) {
+            let pStage = "pending";
+            let epoch = 0;
+            let loss = "N/A";
+            let acc = "N/A";
+            let f1 = "N/A";
+            const logs = window.liveJobLogs[Number(jobId)] || [];
+            logs.forEach(log => {
+                try {
+                    const lData = JSON.parse(log.stage);
+                    if (lData.stage === "preprocessing") pStage = "preprocessing";
+                    if (lData.stage === "training") {
+                        pStage = "training";
+                        if (lData.epoch) epoch = lData.epoch;
+                        if (lData.loss) loss = lData.loss.toFixed(4);
+                    }
+                    if (lData.stage === "evaluation") {
+                        pStage = "evaluation";
+                        if (lData.accuracy) acc = lData.accuracy;
+                        if (lData.f1) f1 = lData.f1;
+                    }
+                } catch(e) {}
+            });
+            if (status === 2 || status === 3) pStage = "completed";
+
+            const isPre = pStage === "preprocessing" || pStage === "training" || pStage === "evaluation" || pStage === "completed";
+            const isTrain = pStage === "training" || pStage === "evaluation" || pStage === "completed";
+            const isEval = pStage === "evaluation" || pStage === "completed";
+
+            let progWidth = "0%";
+            if (pStage === "preprocessing") progWidth = "15%";
+            else if (pStage === "training") progWidth = "50%";
+            else if (pStage === "evaluation") progWidth = "85%";
+            else if (pStage === "completed") progWidth = "100%";
+
+            detailHTML += `
+            <div class="detail-section" style="margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label style="margin: 0;">ML Training Pipeline</label>
+                    <span style="font-size: 11px; color: var(--primary); font-weight: bold;">${progWidth}</span>
+                </div>
+                <div style="width: 100%; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; margin-bottom: 16px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);">
+                    <div style="height: 100%; background: linear-gradient(90deg, var(--primary), var(--info)); transition: width 0.5s ease; width: ${progWidth}; border-radius: 3px; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);"></div>
+                </div>
+                <div class="pipeline-container">
+                    <div class="pipeline-stage ${isPre ? 'completed' : 'active'}">
+                        <div class="stage-icon">1</div>
+                        <span class="stage-label">Preprocessing</span>
+                    </div>
+                    <div class="pipeline-stage ${isTrain ? 'completed' : (pStage==='preprocessing'?'active':'')}">
+                        <div class="stage-icon">2</div>
+                        <span class="stage-label">Training</span>
+                    </div>
+                    <div class="pipeline-stage ${isEval ? 'completed' : (pStage==='training'?'active':'')}">
+                        <div class="stage-icon">3</div>
+                        <span class="stage-label">Evaluation</span>
+                    </div>
+                </div>
+                <div class="metrics-panel">
+                    <div class="metric-box">
+                        <span class="metric-box-label">Epoch</span>
+                        <span class="metric-box-value">${epoch}</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-box-label">Loss</span>
+                        <span class="metric-box-value">${loss}</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-box-label">Accuracy</span>
+                        <span class="metric-box-value">${acc}</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-box-label">F1 Score</span>
+                        <span class="metric-box-value">${f1}</span>
+                    </div>
+                </div>
+            </div>`;
+        }
 
         if (status === 1) { // Assigned (Executing)
             detailHTML += `
@@ -408,7 +568,7 @@ async function showJobDetail(jobId) {
                 <div class="agent-timeline" id="live-logs-${Number(job.id)}">
                     ${(window.liveJobLogs[Number(job.id)] || []).map(log => {
                         return `
-                            <div class="timeline-step">\n                                <div class="timeline-icon">✓</div>\n                                <div class="timeline-content">\n                                    <span class="timeline-time">${log.time.toLocaleTimeString()}</span>\n                                    <span class="timeline-text">${escapeHtml(log.stage)}</span>\n                                </div>\n                            </div>`;
+                            <div class="timeline-step">\n                                <div class="timeline-icon">✓</div>\n                                <div class="timeline-content">\n                                    <span class="timeline-time">${log.time.toLocaleTimeString()}</span>\n                                    <span class="timeline-text">${escapeHtml(typeof log.stage === 'string' && log.stage.startsWith('{') ? JSON.parse(log.stage).message || log.stage : log.stage)}</span>\n                                </div>\n                            </div>`;
                     }).join("")}
                     <div class="timeline-step in-progress" id="timeline-loading-${Number(job.id)}">
                         <div class="timeline-icon spinner"></div>
@@ -449,7 +609,7 @@ async function showJobDetail(jobId) {
                                     <span>Est: ${Math.floor(Number(bid.estimatedDuration) / 60)} min</span>
                                     ${bid.accepted ? '<span class="accepted-tag">✓ Accepted</span>' : ''}
                                 </div>
-                                ${isClient && status === 0 && !bid.accepted ? `
+                                ${currentRole === "CLIENT" && isClient && status === 0 && !bid.accepted ? `
                                 <button class="btn-sm btn-primary" onclick="acceptBid(${jobId}, '${bid.provider}')">Accept Bid</button>
                                 ` : ''}
                             </div>
@@ -459,9 +619,34 @@ async function showJobDetail(jobId) {
             `;
         }
 
+        if (currentRole === "PROVIDER" && status === 0) {
+            detailHTML += `
+            <div class="detail-section" style="margin-top: 1rem;" id="manual-bid-section">
+                <h4>Submit Manual Bid</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price (ETH)</label>
+                        <input type="number" id="manual-bid-price" step="0.001" min="0.001" value="${ethers.formatEther(job.budget)}">
+                    </div>
+                    <div class="form-group">
+                        <label>Est. Duration (hrs)</label>
+                        <input type="number" id="manual-bid-duration" step="0.1" min="0.1" value="1.0">
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-full" onclick="submitManualBid(${jobId})">Submit Bid</button>
+            </div>
+            `;
+        }
+
+        if (currentRole === "PROVIDER" && status === 1 && job.assignedProvider.toLowerCase() === userAddress.toLowerCase()) {
+            detailHTML += `<div class="detail-actions" style="margin-top:1rem;" id="execution-action-section">
+                <button class="btn btn-success btn-full" onclick="startProviderExecution(${jobId}, decodeURIComponent('${encodeURIComponent(job.description)}'))">🚀 Start Execution</button>
+            </div>`;
+        }
+
         // Action buttons
         let actions = '';
-        if (isClient) {
+        if (currentRole === "CLIENT" && isClient) {
             if (status === 0) {
                 actions += `<button class="btn btn-danger" onclick="cancelJob(${jobId})">Cancel Job</button>`;
             }
@@ -506,7 +691,18 @@ async function postJob(event) {
     
     const isPythonTask = document.getElementById("is-python-task")?.checked;
     if (isPythonTask) {
-        description = "[PYTHON-TASK] " + description;
+        const sel = document.getElementById("job-template-select");
+        if (sel && sel.value === 'ml') {
+            description = JSON.stringify({
+                jobType: "ML_PIPELINE",
+                stage: "training",
+                model: "logistic_regression",
+                dataset: "spam_classification",
+                text: description
+            });
+        } else {
+            description = "[PYTHON-TASK] " + description;
+        }
         dataHash = document.getElementById("job-python-code").value;
     }
 
@@ -978,9 +1174,98 @@ async function castVote(proposalId, support) {
         const tx = await governanceContract.vote(proposalId, support);
         await tx.wait();
         systemLog("Vote cast successfully!", "success");
-        await loadGovernanceView();
+        await refreshData();
     } catch (err) {
         systemLog("Vote failed: " + err.message, "error");
+    }
+}
+
+async function submitManualBid(jobId) {
+    if (!jobMarketContract) {
+        systemLog("Please connect your wallet first", "error");
+        return;
+    }
+    const priceInput = document.getElementById("manual-bid-price").value;
+    const durationInput = document.getElementById("manual-bid-duration").value;
+    
+    if (!priceInput || parseFloat(priceInput) <= 0) {
+        systemLog("Bid price must be greater than 0", "error");
+        return;
+    }
+    if (!durationInput || parseFloat(durationInput) <= 0) {
+        systemLog("Duration must be greater than 0", "error");
+        return;
+    }
+
+    try {
+        const bidSection = document.getElementById("manual-bid-section");
+        if (bidSection) {
+            bidSection.innerHTML = `<div style="padding: 1rem; text-align: center; color: var(--info); font-weight: 500; background: rgba(59, 130, 246, 0.1); border-radius: var(--radius-sm);">⏳ Transaction Pending...</div>`;
+        }
+
+        // Auto-stake if not staked
+        const isStaked = await jobMarketContract.isStaked(userAddress);
+        if (!isStaked) {
+            systemLog("Wallet not staked as provider. Auto-staking...", "info");
+            const minStake = await jobMarketContract.minimumStake();
+            // Stake as GPU_BASIC (Tier 1)
+            const stakeTx = await jobMarketContract.stakeAsProvider(1, 16, 8192, 32768, { value: minStake * 2n });
+            await stakeTx.wait();
+            systemLog("Staked successfully!", "success");
+        }
+
+        const priceEth = ethers.parseEther(priceInput);
+        const durationSecs = Math.floor(parseFloat(durationInput) * 3600);
+        systemLog(`Submitting manual bid for job #${jobId} at ${priceInput} ETH...`, "info");
+        const tx = await jobMarketContract.submitBid(jobId, priceEth, durationSecs);
+        await tx.wait();
+        systemLog("Bid submitted successfully!", "success");
+        closeSlideOver();
+        await refreshData();
+    } catch (err) {
+        systemLog("Bid submission failed: " + err.message, "error");
+    }
+}
+
+async function startProviderExecution(jobId, descriptionStr) {
+    const port = PROVIDER_REGISTRY[userAddress];
+    if (!port) {
+        systemLog(`No provider API mapping found for ${userAddress ? userAddress.slice(0,8) : 'unknown'}`, "error");
+        return;
+    }
+    systemLog(`Triggering execution for Job #${jobId} on Provider node (port ${port})...`, "info");
+    
+    const logsContainer = document.getElementById(`live-logs-${jobId}`);
+    if (logsContainer) {
+        logsContainer.innerHTML += `
+        <div class="timeline-step in-progress" id="timeline-loading-${jobId}">
+            <div class="timeline-icon spinner"></div>
+            <div class="timeline-content">
+                <span class="timeline-text">Triggering local agent process...</span>
+            </div>
+        </div>`;
+    }
+
+    const execSection = document.getElementById("execution-action-section");
+    if (execSection) {
+        execSection.innerHTML = `<div style="padding: 1rem; text-align: center; color: var(--success); font-weight: 500; background: rgba(34, 197, 94, 0.1); border-radius: var(--radius-sm); border: 1px solid rgba(34, 197, 94, 0.3);">🚀 Execution Environment Triggered</div>`;
+    }
+
+    try {
+        const response = await fetch(`http://127.0.0.1:${port}/execute`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ jobId, jobMetadata: descriptionStr })
+        });
+        
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || "Unknown error");
+        }
+        
+        systemLog(`Execution started! Provider Node is running the workflow.`, "success");
+    } catch (err) {
+        systemLog("Execution trigger failed: " + err.message, "error");
     }
 }
 
