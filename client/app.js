@@ -641,6 +641,32 @@ async function showJobDetail(jobId) {
             </div>`;
         }
 
+        let trustHTML = '';
+        if (status === 0) {
+            trustHTML = `<span style="color:var(--info);">Escrow Locked:</span> <strong>${ethers.formatEther(job.budget)} ETH</strong> locked in <code>JobMarket.sol</code>. Funds are secured on-chain and await a signed provider bid.`;
+        } else if (status === 1) {
+            trustHTML = `<span style="color:var(--success);">Execution Enforced:</span> Provider <strong>${job.assignedProvider.slice(0,8)}</strong> has staked ETH. Execution logs are actively being cryptographically hashed and committed to the chain via <code>reportProgress()</code>.`;
+        } else if (status === 2) {
+            trustHTML = `<span style="color:var(--primary);">Awaiting Settlement:</span> Proof of Computation (<code>${(job.resultHash || "").slice(0,15)}...</code>) is verified on-chain. Client can invoke <code>confirmCompletion()</code> to release the escrow, or raise a dispute to freeze funds.`;
+        } else if (status === 3) {
+            trustHTML = `<span style="color:var(--success);">Settlement Executed:</span> Escrow successfully released to the Provider via smart contract. Immutable reputation points have been minted on-chain to both parties.`;
+        } else if (status === 5) {
+            trustHTML = `<span style="color:var(--danger);">Arbitration Triggered:</span> Funds are completely frozen in <code>JobMarket.sol</code>. The decentralized arbitration module will review immutable execution logs to rule on the outcome.`;
+        }
+
+        if (trustHTML) {
+            detailHTML += `
+            <div class="detail-section" style="margin-top: 1.5rem; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-light); border-left: 3px solid var(--primary); padding: 1rem; border-radius: var(--radius-sm);">
+                <h4 style="margin-top:0; margin-bottom: 8px; display:flex; align-items:center; gap:8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    Blockchain Trust Layer
+                </h4>
+                <div style="font-size:12px; color:var(--text-secondary); line-height: 1.5;">
+                    ${trustHTML}
+                </div>
+            </div>`;
+        }
+
         // Action buttons
         let actions = '';
         if (currentRole === "CLIENT" && isClient) {

@@ -1,5 +1,5 @@
 // Auto-generated deployment configuration
-// Deployed: 2026-04-21T19:51:47.677Z
+// Deployed: 2026-04-21T20:15:12.291Z
 // Network: localhost
 
 const CONFIG = {
