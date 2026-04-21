@@ -1,146 +1,109 @@
-# Decentralized HPC Marketplace
+# Decentralized HPC Marketplace (TRL 5 Prototype)
 
-A blockchain-based marketplace for high-performance computing resources, featuring smart contract escrow, tiered reputation, multi-phase dispute arbitration, and DAO governance.
+A high-fidelity, blockchain-powered marketplace for High-Performance Computing (HPC) resources. This system enables trustless resource allocation through smart-contract escrow, verified by autonomous provider nodes with live agentic execution traces.
 
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.20-363636?logo=solidity)](https://soliditylang.org/)
 [![Hardhat](https://img.shields.io/badge/Hardhat-2.x-FFF100?logo=ethereum)](https://hardhat.org/)
+[![TRL 5](https://img.shields.io/badge/TRL-5-green.svg)](https://en.wikipedia.org/wiki/Technology_readiness_level)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
 
-## Features
+## 🚀 TRL 5 High-Fidelity Demonstration
 
-| Feature | Description |
-|---------|-------------|
-| **Job Marketplace** | Post compute jobs with ETH escrow, tiered hardware requirements, and SLA enforcement |
-| **Provider Reputation** | Weighted scoring with streak bonuses, epoch freshness, and Sybil-resistant stake weighting |
-| **Dispute Resolution** | Multi-phase arbitration: evidence submission → escalation → resolution with stake slashing |
-| **DAO Governance** | HPCGov ERC-20 token for proposal creation, weighted voting, and advisory parameter changes |
-| **Provider Node** | Autonomous agent with hardware benchmarking, resource-aware bidding, and proof-of-computation |
-| **Web Interface** | Dashboard, leaderboard, dispute management, governance voting, and network topology visualization |
+> [!IMPORTANT]
+> For the complete panel presentation guide, including account setup and live execution steps, see the **[DEMO README](DEMO_README.md)**.
 
----
+This project has achieved **Technology Readiness Level (TRL) 5**, meaning the technology has been validated in a relevant environment. It demonstrates an end-to-end decentralized compute workflow involving realistic workloads, financial settlement, and multi-user interaction.
 
-## Quick Start
+### 🎥 System Workflow
 
-> **Note:** `hardhat-gas-reporter` is bundled by `@nomicfoundation/hardhat-toolbox` and must **not** be added as a separate `devDependency`. Adding it independently (especially v2.x) causes an `ERESOLVE` peer-dependency conflict. If you encounter npm install errors, run:
-> ```bash
-> npm install --legacy-peer-deps
-> ```
+```mermaid
+sequenceDiagram
+    participant C as Client (Browser/Wallet)
+    participant BC as Blockchain (Smart Contracts)
+    participant P as Provider (Autonomous Node)
 
-```bash
-# Install dependencies
-npm install
-
-# Compile contracts
-npm run compile
-
-# Run test suite (55 tests)
-npm test
-
-# Start local blockchain
-npm run node
-
-# Deploy contracts (in a new terminal)
-npm run deploy
-
-# Start a provider node (in a new terminal)
-npm run provider
-
-# Launch web interface (in a new terminal, opens at http://localhost:3000)
-npm run client
-```
-
-### Docker
-
-```bash
-docker compose up --build
-```
-
-This starts 5 services: blockchain node, deployer, 3 provider nodes, and the web client.
-
----
-
-## Project Structure
-
-```
-├── contracts/
-│   ├── JobMarket.sol          # Core marketplace with escrow & SLA
-│   ├── Reputation.sol         # Tiered reputation with leaderboard
-│   ├── DisputeResolution.sol  # Multi-phase arbitration protocol
-│   └── GovernanceToken.sol    # HPCGov ERC-20 DAO token
-├── test/
-│   ├── JobMarket.test.js      # 45 tests — marketplace + reputation + disputes
-│   └── GovernanceToken.test.js # 10 tests — proposal lifecycle + voting
-├── scripts/
-│   └── deploy.js              # Deploys and links all 4 contracts
-├── provider/
-│   └── index.js               # Autonomous provider node
-├── client/
-│   ├── index.html             # Web interface
-│   ├── app.js                 # Client logic
-│   ├── styles.css             # Dark glassmorphism theme
-│   └── contracts.js           # ABIs for all contracts
-├── docker/                    # Dockerfiles for each service
-├── ARCHITECTURE.md            # System architecture with diagrams
-├── RESEARCH.md                # Literature review & theoretical context
-└── docker-compose.yml         # Multi-service orchestration
+    C->>BC: Post Job (attach ETH escrow)
+    P->>BC: Scan Jobs & Verify SLA
+    P->>BC: Submit Bid (stake-weighted)
+    C->>BC: Select Bid (Locks SLA)
+    P->>P: Agentic Execution (ML/NTT/Monte Carlo)
+    P->>BC: Stream Execution Traces "Thinking..."
+    P->>BC: Submit Proof of Computation
+    C->>BC: Confirm Result Success
+    BC->>P: Release Escrow (minus platform fee)
+    BC->>BC: Update Reputation (Success Streak)
 ```
 
 ---
 
-## Smart Contract Architecture
+## 💎 Core Innovation Pillars
 
+### 1. Agentic Execution Traceability
+Unlike static compute jobs, our provider nodes utilize an **LLM-style thinking trace**. During execution, nodes stream live status updates (e.g., "Initializing NTT coefficients...", "Optimizing NTT NTT butterfly loops...") to the blockchain, providing clients with unparalleled visibility into the "thought process" of the decentralized compute node.
+
+### 2. Multi-Account Escrow Model
+We utilize a robust escrow system where client funds are locked in the `JobMarket.sol` contract upon job creation. Funds are only released to providers upon successful verification of the computation, ensuring 100% financial security for both parties.
+
+### 3. Comprehensive HPC Workload Templates
+The system includes pre-configured, real-world Python templates for various HPC domains:
+- **Machine Learning**: K-Means Clustering on synthetic datasets.
+- **Post-Quantum Cryptography (PQC)**: Superposition NTT (Number Theoretic Transform) optimizations.
+- **Scientific Computing**: Monte Carlo simulations for risk assessment.
+- **Data Engineering**: Large-scale data transformation and filtering.
+
+---
+
+## 🛠️ Quick Start: Running the TRL 5 Demo
+
+The fastest way to witness the marketplace in action is via the automated launch script.
+
+### Prerequisites
+- [MetaMask](https://metamask.io/) installed in your browser.
+- [Node.js](https://nodejs.org/) (v16+) and [Python](https://www.python.org/) installed.
+
+### Start the High-Fidelity Demo
+Run the provided PowerShell script to launch the entire environment (Blockchain, Provider, and UI) simultaneously:
+
+```powershell
+./launch-demo.ps1
 ```
-JobMarket.sol ──► Reputation.sol      (incrementReputation on job completion)
-     │
-     └──────────► DisputeResolution.sol (raiseDispute on contested results)
 
-GovernanceToken.sol ──► Advisory parameter changes via events
-```
-
-**Security:** ReentrancyGuard, checks-effects-interactions, stake-weighted Sybil resistance
+*This script will:*
+1. Start a local **Hardhat Blockchain Node**.
+2. Deploy the **Smart Contract Suite** (Marketplace, Reputation, Governance, Disputes).
+3. Spin up an **Autonomous Provider Node**.
+4. Open the **Glassmorphism Web Dashboard** at `http://localhost:8080`.
 
 ---
 
-## Testing
+## 🏗️ Technical Architecture
 
-```bash
-npm test
-```
+### Smart Contract Suite
+- **`JobMarket.sol`**: Manages the job lifecycle, escrow logic, and bid selection.
+- **`Reputation.sol`**: Implements a tiered reward system with success streaks and leaderboard logic.
+- **`DisputeResolution.sol`**: Multi-phase arbitration with evidence submission and arbitrator escalation.
+- **`GovernanceToken.sol`**: ERC-20 token (`HPCGov`) for DAO-based parameter adjustments.
 
-**55 tests** covering:
-- Contract deployment and linking
-- Provider staking with hardware profiles
-- Job posting with compute tier requirements
-- Tier-verified bidding and SLA enforcement
-- Payment release with platform fee distribution
-- Full dispute resolution lifecycle
-- Reputation tiers, streaks, and leaderboard
-- DAO proposal creation, voting, quorum, and execution
-- End-to-end workflow integration
+### Technology Stack
+- **Layer 1 (Trust)**: Solidity 0.8.20, OpenZeppelin.
+- **Execution (Provider)**: Node.js with Python subprocess integration for HPC jobs.
+- **UI/UX**: HTML5, Vanilla CSS (Premium Glassmorphism), Ethers.js v6.
+- **Visualization**: D3.js and Mermaid for network and execution traces.
 
 ---
 
-## Documentation
+## 📈 Technical Roadmap
 
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** — System diagrams, data flows, security model
-- **[RESEARCH.md](RESEARCH.md)** — Literature review on mechanism design, Sybil resistance, arbitration theory
+Moving from TRL 5 to TRL 9 (Full Deployment):
 
----
-
-## Technology Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Smart Contracts | Solidity 0.8.20, OpenZeppelin 5.0.0 |
-| Development | Hardhat, Chai, ethers.js v6 |
-| Provider Node | Node.js |
-| Client | HTML/CSS/JS, ethers.js v6 |
-| Containerization | Docker Compose |
+- [ ] **TRL 6**: Cross-chain support (Polygon/Arbitrum) for lower gas costs.
+- [ ] **TRL 7**: Zero-Knowledge (zk-SNARKs) based Proof-of-Computation for privacy-preserving jobs.
+- [ ] **TRL 8**: Dynamic GPU/TPU resource partitioning and multi-node parallelization.
+- [ ] **TRL 9**: Mainnet deployment with decentralized storage (IPFS/Filecoin) for job data.
 
 ---
 
-## License
-
-MIT
+## 📜 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
