@@ -260,21 +260,8 @@ function subscribeToEvents() {
         window.liveJobLogs[id].push({ stage: stage, time: new Date() });
         
         if (currentSlideOverJobId === id) {
-            const logsContainer = document.getElementById(`live-logs-${id}`);
-            if (logsContainer) {
-                // Remove the loading spinner temporarily
-                const loader = document.getElementById(`timeline-loading-${id}`);
-                if (loader) loader.remove();
-                
-                logsContainer.innerHTML += generateLogHtml(stage, new Date());
-                
-                // Put the loading back if not finished
-                if (!stage.includes("finished") && !stage.includes("complete")) {
-                    logsContainer.innerHTML += `
-                        <div class="timeline-step in-progress" id="timeline-loading-${id}">\n                            <div class="timeline-icon spinner"></div>\n                            <div class="timeline-content">\n                                <span class="timeline-text">Processing next step...</span>\n                            </div>\n                        </div>`;
-                }
-                logsContainer.scrollTop = logsContainer.scrollHeight;
-            }
+            // Re-render the job detail panel to update progress bar and metrics
+            showJobDetail(id);
         }
         systemLog(`Job #${id} progress update received`, "info");
     });
@@ -619,23 +606,33 @@ async function showJobDetail(jobId) {
             `;
         }
 
+        const hasBid = bids.some(b => b.provider.toLowerCase() === (userAddress || "").toLowerCase());
+
         if (currentRole === "PROVIDER" && status === 0) {
-            detailHTML += `
-            <div class="detail-section" style="margin-top: 1rem;" id="manual-bid-section">
-                <h4>Submit Manual Bid</h4>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Price (ETH)</label>
-                        <input type="number" id="manual-bid-price" step="0.001" min="0.001" value="${ethers.formatEther(job.budget)}">
+            if (!hasBid) {
+                detailHTML += `
+                <div class="detail-section" style="margin-top: 1rem;" id="manual-bid-section">
+                    <h4>Submit Manual Bid</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Price (ETH)</label>
+                            <input type="number" id="manual-bid-price" step="0.001" min="0.001" value="${ethers.formatEther(job.budget)}">
+                        </div>
+                        <div class="form-group">
+                            <label>Est. Duration (hrs)</label>
+                            <input type="number" id="manual-bid-duration" step="0.1" min="0.1" value="1.0">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Est. Duration (hrs)</label>
-                        <input type="number" id="manual-bid-duration" step="0.1" min="0.1" value="1.0">
-                    </div>
+                    <button class="btn btn-primary btn-full" onclick="submitManualBid(${jobId})">Submit Bid</button>
                 </div>
-                <button class="btn btn-primary btn-full" onclick="submitManualBid(${jobId})">Submit Bid</button>
-            </div>
-            `;
+                `;
+            } else {
+                detailHTML += `
+                <div class="detail-section" style="margin-top: 1rem; text-align: center; color: var(--success); font-weight: 500; background: rgba(34, 197, 94, 0.1); border-radius: var(--radius-sm); padding: 1rem; border: 1px solid rgba(34, 197, 94, 0.3);">
+                    ✅ Your bid has been successfully submitted and is awaiting client review.
+                </div>
+                `;
+            }
         }
 
         if (currentRole === "PROVIDER" && status === 1 && job.assignedProvider.toLowerCase() === userAddress.toLowerCase()) {
@@ -1018,8 +1015,9 @@ async function loadDisputesView() {
             <div class="disputes-list">
                 ${disputes.map(d => {
             const status = Number(d.status);
-            const isMyDispute = d.client.toLowerCase() === userAddress.toLowerCase() ||
-                d.provider.toLowerCase() === userAddress.toLowerCase();
+            const uAddr = userAddress ? userAddress.toLowerCase() : "";
+            const isMyDispute = (d.client && d.client.toLowerCase() === uAddr) ||
+                (d.provider && d.provider.toLowerCase() === uAddr);
             return `
                     <div class="dispute-card ${isMyDispute ? 'my-dispute' : ''}">
                         <div class="dispute-header">
@@ -1029,9 +1027,9 @@ async function loadDisputesView() {
                         <div class="dispute-body">
                             <div class="dispute-info">
                                 <span>Job #${Number(d.jobId)}</span>
-                                <span>Client: ${d.client.slice(0, 8)}...</span>
-                                <span>Provider: ${d.provider.slice(0, 8)}...</span>
-                                <span>Stake at risk: ${ethers.formatEther(d.stakeAtRisk)} ETH</span>
+                                <span>Client: ${(d.client || "0x000000").slice(0, 8)}...</span>
+                                <span>Provider: ${(d.provider || "0x000000").slice(0, 8)}...</span>
+                                <span>Stake at risk: ${ethers.formatEther(d.stakeAtRisk || 0n)} ETH</span>
                             </div>
                             <div class="dispute-timeline">
                                 <div class="timeline-item ${status >= 1 ? 'active' : ''}">Raised</div>
