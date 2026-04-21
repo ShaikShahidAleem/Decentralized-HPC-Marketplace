@@ -1325,3 +1325,151 @@ body {
     color: var(--text-secondary);
     font-size: 12px;
 }
+
+/* ═══════════ Agentic Timeline ═══════════ */
+.agent-timeline {
+    background: #000;
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--primary);
+    font-family: var(--mono);
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.timeline-step {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.timeline-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 20px;
+    bottom: -12px;
+    width: 1px;
+    background: var(--text-muted);
+    opacity: 0.3;
+}
+
+.timeline-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--success-soft);
+    color: var(--success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    z-index: 2;
+    border: 1px solid var(--success);
+}
+
+.timeline-icon.spinner {
+    background: transparent;
+    border: 2px solid var(--text-muted);
+    border-top-color: var(--primary);
+    animation: spin 1s linear infinite;
+    color: transparent;
+}
+
+.timeline-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.timeline-time {
+    color: var(--text-muted);
+    font-size: 10px;
+    margin-bottom: 2px;
+}
+
+.timeline-text {
+    color: #e5e5e5;
+    font-size: 12px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ─────────────────────────────────────────────────────────
+ *  Agent Chat Advanced UI
+ * ───────────────────────────────────────────────────────── */
+.agent-chat-message {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin: 16px 0 16px 16px;
+    font-family: var(--serif, "Segoe UI", sans-serif);
+}
+
+.agent-action {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin: 12px 0 12px 16px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.agent-action summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    list-style: none; /* Hide default arrow in some browsers */
+}
+
+.agent-action summary::-webkit-details-marker {
+    display: none;
+}
+
+.agent-action summary:hover {
+    background: var(--border-light);
+}
+
+.agent-action .action-badge {
+    background: var(--border);
+    color: var(--text-muted);
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-family: var(--mono);
+}
+
+.agent-action .action-steps {
+    border-top: 1px solid var(--border);
+    padding: 12px;
+    background: rgba(0,0,0,0.2);
+}
+
+.action-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-family: var(--mono);
+}
+.action-step:last-child {
+    margin-bottom: 4px;
+}
+.action-step.done {
+    color: #4CAF50;
+}
+.action-step.done .mono {
+    color: var(--text-primary);
+}

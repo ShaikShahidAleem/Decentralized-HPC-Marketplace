@@ -11,6 +11,7 @@ const JOB_MARKET_ABI = [
     "event ResultSubmitted(uint256 indexed jobId, address indexed provider, string resultHash)",
     "event JobCompleted(uint256 indexed jobId, address indexed client, address indexed provider, uint256 payment, uint256 platformFee)",
     "event JobCancelled(uint256 indexed jobId, address indexed client, uint256 refundAmount)",
+    "event JobProgress(uint256 indexed jobId, string stage)",
     "event ProviderStaked(address indexed provider, uint256 amount, uint8 tier)",
     "event DisputeRaisedForJob(uint256 indexed jobId, address indexed client, uint256 disputeId)",
     "event SLAViolation(uint256 indexed jobId, address indexed provider, uint256 deadline)",
@@ -25,6 +26,7 @@ const JOB_MARKET_ABI = [
     "function cancelJob(uint256 _jobId) external",
     "function raiseDispute(uint256 _jobId) external",
     "function reportSLAViolation(uint256 _jobId) external",
+    "function reportProgress(uint256 _jobId, string calldata _message) external",
 
     // Provider Management
     "function stakeAsProvider(uint8 _tier, uint256 _cpuCores, uint256 _gpuVRAM, uint256 _ramMB) payable",

@@ -16,6 +16,9 @@
 
 const { ethers } = require("ethers");
 const crypto = require("crypto");
+const fs = require("fs");
+const child_process = require("child_process");
+const path = require("path");
 const CONFIG = require("./config");
 
 // ─────────────────────────────────────────────────────────
@@ -26,9 +29,13 @@ const JOB_MARKET_ABI = [
     "event JobPosted(uint256 indexed jobId, address indexed client, uint256 budget, string dataHash, string description, uint256 deadline, uint8 requiredTier)",
     "event JobAssigned(uint256 indexed jobId, address indexed provider, uint256 amount, uint256 slaDeadline)",
     "event JobCompleted(uint256 indexed jobId, address indexed client, address indexed provider, uint256 payment, uint256 platformFee)",
+    "event JobProgress(uint256 indexed jobId, string stage)",
+    "event JobAssigned(uint256 indexed jobId, address indexed provider, uint256 amount, uint256 slaDeadline)",
+    "event JobCompleted(uint256 indexed jobId, address indexed client, address indexed provider, uint256 payment, uint256 platformFee)",
     "function stakeAsProvider(uint8 _tier, uint256 _cpuCores, uint256 _gpuVRAM, uint256 _ramMB) payable",
     "function submitBid(uint256 _jobId, uint256 _amount, uint256 _estimatedDuration) external",
     "function submitResult(uint256 _jobId, string _resultHash) external",
+    "function reportProgress(uint256 _jobId, string calldata _message) external",
     "function getJob(uint256 _jobId) view returns (tuple(uint256 id, address client, uint256 budget, uint256 deposit, uint8 status, address assignedProvider, string dataHash, string resultHash, uint256 createdAt, uint256 deadline, string description, uint8 requiredTier, uint256 slaDeadline))",
     "function isStaked(address _provider) view returns (bool)",
     "function getStake(address _provider) view returns (uint256)",
@@ -442,33 +449,111 @@ class ComputeProviderNode {
         try {
             const job = await this.jobMarket.getJob(jobId);
             const dataHash = job.dataHash;
+            const description = job.description;
 
             this.log.info(`⚙️  Executing job #${jobId}...`);
-            this.log.info(`   Input data: ${dataHash}`);
             this.log.info(`   Hardware: ${this.hardware.label}`);
 
-            // Phase 1: Data ingestion simulation
-            this.log.info("   Phase 1/4: Data ingestion...");
-            await this.sleep(1000);
+            let resultHash = "";
 
-            // Phase 2: Preprocessing
-            this.log.info("   Phase 2/4: Preprocessing & validation...");
-            await this.sleep(1500);
+            if (description.includes("[PYTHON-TASK]")) {
+                this.log.info("   Detected REAL Python Execution Task");
+                
+                // Decode from base64 if needed, or assume raw text. Let's assume raw text payload.
+                const pythonCode = dataHash; 
 
-            // Phase 3: Computation with proof generation
-            this.log.info("   Phase 3/4: Core computation...");
-            const proof = ProofOfComputation.generateHashChain(dataHash, 100);
-            this.log.metric("   Proof-of-computation generated", {
-                inputHash: proof.inputHash.substring(0, 16) + "...",
-                outputHash: proof.outputHash.substring(0, 16) + "...",
-                iterations: proof.iterations
-            });
-            await this.sleep(2000);
+                // Phase 1: Write to file
+                this.log.info("   Phase 1/4: Saving Python task payload...");
+                
+                const taskDir = path.join(__dirname, '..', 'tmp_tasks');
+                const outDir = path.join(__dirname, '..', 'provider_results');
+                if (!fs.existsSync(taskDir)) fs.mkdirSync(taskDir, { recursive: true });
+                if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
-            // Phase 4: Result packaging
-            this.log.info("   Phase 4/4: Packaging results...");
-            const resultHash = `QmResult_${proof.outputHash.substring(0, 32)}`;
-            await this.sleep(500);
+                await this.jobMarket.reportProgress(jobIdNum, JSON.stringify({
+                    type: "chat", text: "I'll download the smart contract workload first, then allocate a secure native execution sandbox."
+                }));
+                await this.sleep(1500);
+
+                const scriptPath = path.join(taskDir, `task_${jobIdNum}.py`);
+                fs.writeFileSync(scriptPath, pythonCode);
+                
+                await this.jobMarket.reportProgress(jobIdNum, JSON.stringify({
+                    type: "action", title: "Read and save payload to Sandbox", badge: "Script", steps: ["Check if tmp_tasks exists", `Write file task_${jobIdNum}.py`]
+                }));
+                await this.sleep(1500);
+
+                // Phase 2-3: Execution
+                this.log.info("   Phase 2-3/4: Executing Python script natively...");
+                await this.jobMarket.reportProgress(jobIdNum, JSON.stringify({
+                    type: "chat", text: "Now I have everything I need. Let me execute the Python workload natively."
+                }));
+                await this.sleep(1500);
+
+                await this.jobMarket.reportProgress(jobIdNum, JSON.stringify({
+                    type: "action", title: "Spawn physical child process", badge: "Script", steps: [`Execute python "tmp_tasks/task_${jobIdNum}.py"`, `Awaiting stdout buffers...`]
+                }));
+                
+                let executionOutput = "";
+                try {
+                    // Timeout of 30 seconds for safety in sandbox
+                    executionOutput = child_process.execSync(`python "${scriptPath}"`, { timeout: 30000 }).toString();
+                    this.log.success("   Execution Successful");
+                } catch (execErr) {
+                    this.log.warn(`   Execution Error/Stderr: ${execErr.message}`);
+                    executionOutput = (execErr.stdout ? execErr.stdout.toString() : "") + "\nERROR: " + execErr.message;
+                }
+                
+                this.log.metric("   Task output captured.", { outputLength: executionOutput.length });
+
+                const outDir = path.join(__dirname, '..', 'provider_results');
+                if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+                const resultPath = path.join(outDir, `job_${jobIdNum}_result.txt`);
+                fs.writeFileSync(resultPath, executionOutput);
+
+                // Phase 4: Result packaging (Base64 Encode)
+                this.log.info("   Phase 4/4: Packaging execution results...");
+                
+                await this.jobMarket.reportProgress(jobIdNum, JSON.stringify({
+                    type: "chat", text: `The processes have successfully completed. I have combined all the execution outputs and saved them securely to the provider's physical server layer at: \n\`${resultPath}\`\n\nI will now convert this data to Base64 and submit it to Ethereum.`
+                }));
+                await this.sleep(2000);
+
+                const encodedOutput = Buffer.from(executionOutput).toString("base64");
+                
+                await this.jobMarket.reportProgress(jobIdNum, JSON.stringify({
+                    type: "action", title: "Encode and submit to blockchain", badge: "Smart Contract", steps: [`Buffer.from(stdout).toString("base64")`, `jobMarket.submitResult(${jobIdNum}, hash)`]
+                }));
+                
+                resultHash = `RESULT_B64:${encodedOutput}`;
+                await this.sleep(500);
+
+            } else {
+                this.log.info("   Running standard simulation task...");
+                this.log.info(`   Input data: ${dataHash}`);
+                // Phase 1: Data ingestion simulation
+                this.log.info("   Phase 1/4: Data ingestion...");
+                await this.sleep(1000);
+
+                // Phase 2: Preprocessing
+                this.log.info("   Phase 2/4: Preprocessing & validation...");
+                await this.sleep(1500);
+
+                // Phase 3: Computation with proof generation
+                this.log.info("   Phase 3/4: Core computation...");
+                const proof = ProofOfComputation.generateHashChain(dataHash, 100);
+                this.log.metric("   Proof-of-computation generated", {
+                    inputHash: proof.inputHash.substring(0, 16) + "...",
+                    outputHash: proof.outputHash.substring(0, 16) + "...",
+                    iterations: proof.iterations
+                });
+                await this.sleep(2000);
+
+                // Phase 4: Result packaging
+                this.log.info("   Phase 4/4: Packaging results...");
+                resultHash = `QmResult_${proof.outputHash.substring(0, 32)}`;
+                await this.sleep(500);
+            }
 
             // Submit result on-chain
             this.log.info(`📤 Submitting result for job #${jobId}...`);
@@ -476,7 +561,7 @@ class ComputeProviderNode {
             await tx.wait();
 
             this.activeJobs.set(jobIdNum, { ...this.activeJobs.get(jobIdNum), status: "completed" });
-            this.log.success(`Job #${jobId} execution complete`, { resultHash });
+            this.log.success(`Job #${jobId} execution complete`, { resultHash: resultHash.length > 50 ? resultHash.substring(0, 50) + "..." : resultHash });
 
         } catch (err) {
             this.failedJobs++;

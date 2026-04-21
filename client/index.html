@@ -116,9 +116,19 @@
                             </svg>
                             Connect Wallet
                         </button>
-                        <div id="connect-menu" class="dropdown-menu glass-panel" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 0.5rem; min-width: 200px; z-index: 100; flex-direction: column; gap: 0.5rem; padding: 0.5rem;">
+                        <div id="connect-menu" class="dropdown-menu glass-panel" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 0.5rem; min-width: 250px; z-index: 100; flex-direction: column; gap: 0.5rem; padding: 0.5rem;">
                             <button class="btn btn-outline" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('metamask')">🦊 MetaMask</button>
-                            <button class="btn btn-outline" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local')">🖥️ Local Test Client</button>
+                            <hr style="border-color: var(--border-light); margin: 4px 0;">
+                            <div style="display: flex; flex-direction: column; gap: 4px; padding: 4px;">
+                                <label style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Custom RPC URL</label>
+                                <input type="text" id="custom-rpc-url" value="http://127.0.0.1:8545" class="input-field" style="font-family: var(--mono); font-size: 11px; padding: 6px; display: none;">
+                                <label style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin-top: 8px;">Select Wallet Profile</label>
+                                <button class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local', 0)">💳 Account 1 (Deployer)</button>
+                                <button class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local', 1)">💳 Account 2 (Client A)</button>
+                                <button class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local', 2)">💳 Account 3 (Provider A)</button>
+                                <button class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local', 3)">💳 Account 4 (Client B)</button>
+                                <button class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start;" onclick="initWeb3('local', 4)">💳 Account 5 (Provider B)</button>
+                            </div>
                         </div>
                     </div>
                     <div id="wallet-info" style="display:none;" class="wallet-info">
@@ -233,7 +243,51 @@
                                     required></textarea>
                             </div>
                             <div class="form-row">
-                                <div class="form-group">
+                                <div class="form-group" style="display:flex; align-items:center; gap:8px; margin-bottom:0;">
+                                    <input type="checkbox" id="is-python-task" style="width:auto; transform:scale(1.2);" onchange="document.getElementById('python-editor-group').style.display=this.checked?'block':'none'; document.getElementById('data-hash-group').style.display=this.checked?'none':'block';">
+                                    <label for="is-python-task" style="margin-bottom:0; cursor:pointer; color:var(--text-primary);">This is a Python Execution Task</label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group" id="python-editor-group" style="display:none; margin-top:14px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <label for="job-python-code" style="margin: 0;">Python Task Implementation</label>
+                                    <select id="job-template-select" onchange="selectJobTemplate()" style="width: auto; padding: 4px 8px; font-size: 11px; background: var(--bg-panel); color: var(--text-primary); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                                        <option value="ml">Template: ML Fine-Tuning</option>
+                                        <option value="monte_carlo">Template: Financial Monte Carlo</option>
+                                        <option value="genomics">Template: Genomic Sequence Alignment</option>
+                                    </select>
+                                </div>
+                                <textarea id="job-python-code" rows="16" class="mono" style="background:#000; color:#0f0; border-left:3px solid var(--primary); font-size:11px;">import math
+import random
+import time
+
+print("Initializing HPC Node Environment...")
+time.sleep(1)
+
+print("[1/3] Generating 50,000 point multidimensional dataset vector...")
+points = [(random.random() * 100, random.random() * 100) for _ in range(50000)]
+time.sleep(2)
+
+print("[2/3] Running clustering optimization algorithm...")
+# Simulate clustering gradient descent
+for epoch in range(1, 6):
+    print(f"   > Epoch {epoch}/5: Loss {0.5 / epoch:.4f}")
+    time.sleep(1)
+
+print("[3/3] Optimization converged successfully.")
+print()
+print("----- HPC TASK REPORT -----")
+print(f"Data Points Processed : {len(points)}")
+print("Target Centroids      : 8")
+print("Final Inertia Loss    : 0.0821")
+print("Execution Status      : SECURE")
+print("---------------------------")
+</textarea>
+                            </div>
+
+                            <div class="form-row" style="margin-top:14px;">
+                                <div class="form-group" id="data-hash-group">
                                     <label for="job-data-hash">Data Hash (IPFS CID)</label>
                                     <input type="text" id="job-data-hash" placeholder="Qm...">
                                 </div>

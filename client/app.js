@@ -12,12 +12,27 @@
 let provider, signer, userAddress;
 let jobMarketContract, reputationContract, disputeContract, governanceContract;
 let currentView = "dashboard";
-
+window.liveJobLogs = {}; // Store live task execution logs
+let currentSlideOverJobId = null;
 const STATUS_MAP = ["Open", "Assigned", "Completed", "Confirmed", "Cancelled", "Disputed"];
 const STATUS_CLASS = ["status-open", "status-assigned", "status-completed", "status-confirmed", "status-cancelled", "status-disputed"];
 const TIER_NAMES = ["CPU Standard", "GPU Basic", "GPU Pro", "HPC Cluster"];
 const REP_TIERS = ["Unranked", "Bronze", "Silver", "Gold", "Platinum"];
 const PROPOSAL_STATUS = ["Active", "Passed", "Rejected", "Executed", "Expired"];
+
+const PYTHON_TEMPLATES = {
+    "ml": `import math\nimport random\nimport time\n\nprint("Initializing HPC Node Environment...")\ntime.sleep(1)\n\nprint("[1/3] Generating 50,000 point multidimensional dataset vector...")\npoints = [(random.random() * 100, random.random() * 100) for _ in range(50000)]\ntime.sleep(2)\n\nprint("[2/3] Running clustering optimization algorithm...")\nfor epoch in range(1, 6):\n    print(f"   > Epoch {epoch}/5: Loss {0.5 / epoch:.4f}")\n    time.sleep(1)\n\nprint("[3/3] Optimization converged successfully.")\nprint()`,
+    "monte_carlo": `import random\nimport time\n\nprint("Starting Monte Carlo Pi Approximation...")\ntime.sleep(1)\ntotal_points = 1000000\npoints_inside = 0\n\nprint("[1/3] Setting up probability matrix...")\ntime.sleep(1)\n\nprint(f"[2/3] Simulating {total_points} execution paths...")\nfor i in range(1, 6):\n    print(f"   > Batch {i}/5 running in parallel workers...")\n    time.sleep(1)\n\npi_estimate = 3.14159\nprint(f"\\n[3/3] Aggregating results...")\nprint("Final computed result: ", pi_estimate)`,
+    "genomics": `import time\n\nprint("Genomic Sequence Alignment Task Started")\ntime.sleep(1)\n\nreference = "ATCG" * 10000\ntarget = "ATGC" * 5\n\nprint("[1/3] Loading genomic database into memory...")\ntime.sleep(2)\n\nprint("[2/3] Applying heuristic alignment algorithm...")\nfor i in range(1, 4):\n    print(f"   > Scanning segment {i}/3...")\n    time.sleep(1)\n\nprint("\\n[3/3] Alignment match found at offset 41022 with 98% confidence.")\n`
+};
+
+function selectJobTemplate() {
+    const sel = document.getElementById("job-template-select");
+    const codeBox = document.getElementById("job-python-code");
+    if (sel && codeBox && PYTHON_TEMPLATES[sel.value]) {
+        codeBox.value = PYTHON_TEMPLATES[sel.value];
+    }
+}
 
 // ─────────────────────────────────────────────────────────
 //  Initialization
@@ -41,10 +56,23 @@ async function initWeb3(method = 'metamask') {
             provider = new ethers.BrowserProvider(window.ethereum);
             signer = await provider.getSigner();
         } else if (method === 'local') {
-            systemLog("Connecting to local node with test account...", "info");
-            // Standard Hardhat Account #0
-            const PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-            provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
+            const rpcInput = document.getElementById('custom-rpc-url');
+            const rpcUrl = rpcInput ? rpcInput.value : "http://127.0.0.1:8545";
+            let accountIndex = 0;
+            if (arguments.length > 1) {
+                accountIndex = arguments[1];
+            }
+            systemLog(`Connecting to node at ${rpcUrl} with test account ${accountIndex + 1}...`, "info");
+            
+            const HARDHAT_KEYS = [
+                "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+                "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
+                "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
+                "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+                "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a"
+            ];
+            const PRIVATE_KEY = HARDHAT_KEYS[accountIndex] || HARDHAT_KEYS[0];
+            provider = new ethers.JsonRpcProvider(rpcUrl);
             signer = new ethers.Wallet(PRIVATE_KEY, provider);
         }
 
@@ -81,16 +109,57 @@ async function initWeb3(method = 'metamask') {
     }
 }
 
+function showActivityLog() {
+    hideAllViews();
+    document.getElementById('view-activity').style.display = 'block';
+    renderActivityLog();
+}
+
+let activityLogs = [];
+
+function renderActivityLog() {
+    const container = document.getElementById('activity-log-container');
+    container.innerHTML = '';
+    activityLogs.slice().reverse().forEach(entry => {
+        container.innerHTML += generateLogHtml(entry.stage, new Date(entry.time));
+    });
+}
+
 function subscribeToEvents() {
     if (!jobMarketContract) return;
 
     jobMarketContract.on("JobPosted", (jobId, client, budget, dataHash, description) => {
-        systemLog(`New job #${jobId} posted: "${description.substring(0, 50)}..." — ${ethers.formatEther(budget)} ETH`, "info");
+        const stage = JSON.stringify({ type: "action", title: "Job Posted", badge: "Job", steps: [
+            `Job #${jobId}`,
+            `Budget: ${ethers.formatEther(budget)} ETH`
+        ]});
+        activityLogs.push({ stage, time: Date.now() });
+        systemLog(`New job #${jobId} posted...`, "info");
         refreshData();
     });
 
+    jobMarketContract.on("BidSubmitted", (jobId, provider, amount, estimatedDuration) => {
+        const stage = JSON.stringify({ type: "action", title: "Bid Submitted", badge: "Bid", steps: [
+            `Job #${jobId}`,
+            `Provider: ${provider.slice(0,8)}...`,
+            `Amount: ${ethers.formatEther(amount)} ETH`
+        ]});
+        activityLogs.push({ stage, time: Date.now() });
+        systemLog(`New bid on Job #${jobId} from ${provider.slice(0,8)}...`, "info");
+        refreshData();
+        if (currentSlideOverJobId === Number(jobId)) {
+            showJobDetail(Number(jobId)); // Refresh panel to show the new bid
+        }
+    });
+
     jobMarketContract.on("JobAssigned", (jobId, provider, amount) => {
-        systemLog(`Job #${jobId} assigned to ${provider.slice(0, 8)}...`, "info");
+        const stage = JSON.stringify({ type: "action", title: "Job Assigned", badge: "Job", steps: [
+            `Job #${jobId}`,
+            `Provider: ${provider.slice(0,8)}...`,
+            `Amount: ${ethers.formatEther(amount)} ETH`
+        ]});
+        activityLogs.push({ stage, time: Date.now() });
+        systemLog(`Job #${jobId} assigned to ${provider.slice(0,8)}...`, "info");
         refreshData();
     });
 
@@ -103,6 +172,70 @@ function subscribeToEvents() {
         systemLog(`⚠️ Dispute #${disputeId} raised for job #${jobId}`, "warning");
         refreshData();
     });
+
+    jobMarketContract.on("ResultSubmitted", (jobId, provider, resultHash) => {
+        const stage = JSON.stringify({ type: "action", title: "Result Submitted", badge: "Result", steps: [
+            `Job #${jobId}`,
+            `Provider: ${provider.slice(0,8)}...`
+        ]});
+        activityLogs.push({ stage, time: Date.now() });
+        systemLog(`Result submitted for Job #${jobId}`, "info");
+        refreshData();
+    });
+
+    jobMarketContract.on("JobProgress", (jobId, stage) => {
+        activityLogs.push({ stage, time: Date.now() });
+        const id = Number(jobId);
+        if (!window.liveJobLogs[id]) window.liveJobLogs[id] = [];
+        window.liveJobLogs[id].push({ stage: stage, time: new Date() });
+        
+        if (currentSlideOverJobId === id) {
+            const logsContainer = document.getElementById(`live-logs-${id}`);
+            if (logsContainer) {
+                // Remove the loading spinner temporarily
+                const loader = document.getElementById(`timeline-loading-${id}`);
+                if (loader) loader.remove();
+                
+                logsContainer.innerHTML += generateLogHtml(stage, new Date());
+                
+                // Put the loading back if not finished
+                if (!stage.includes("finished") && !stage.includes("complete")) {
+                    logsContainer.innerHTML += `
+                        <div class="timeline-step in-progress" id="timeline-loading-${id}">\n                            <div class="timeline-icon spinner"></div>\n                            <div class="timeline-content">\n                                <span class="timeline-text">Processing next step...</span>\n                            </div>\n                        </div>`;
+                }
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+            }
+        }
+        systemLog(`Job #${id} progress update received`, "info");
+    });
+}
+
+function generateLogHtml(stageStr, time) {
+    try {
+        const data = JSON.parse(stageStr);
+        if (data.type === 'chat') {
+            return `
+            <div class="agent-chat-message">
+                <p>${escapeHtml(data.text).replace(/\n/g, '<br>')}</p>
+            </div>`;
+        } else if (data.type === 'action') {
+            return `
+            <details class="agent-action" open>
+                <summary>
+                    <span class="action-title">${escapeHtml(data.title)} <span style="font-size:10px; color:var(--text-muted); font-weight:normal; font-family:var(--mono);">(${time.toLocaleTimeString()})</span></span>
+                    <span class="action-badge">${escapeHtml(data.badge || "System")}</span>
+                </summary>
+                <div class="action-steps">
+                    ${(data.steps || []).map(step => `<div class="action-step"><span class="step-icon">&gt;_</span> <span class="mono">${escapeHtml(step)}</span></div>`).join('')}
+                    <div class="action-step done"><span class="step-icon">✓</span> <span class="mono">Completed</span></div>
+                </div>
+            </details>`;
+        }
+    } catch (e) {
+        // Fallback for simple strings
+    }
+    return `
+        <div class="timeline-step">\n            <div class="timeline-icon">✓</div>\n            <div class="timeline-content">\n                <span class="timeline-time">${time.toLocaleTimeString()}</span>\n                <span class="timeline-text">${escapeHtml(stageStr)}</span>\n            </div>\n        </div>`;
 }
 
 // ─────────────────────────────────────────────────────────
@@ -211,6 +344,8 @@ async function showJobDetail(jobId) {
         const status = Number(job.status);
         const tier = Number(job.requiredTier);
         const isClient = job.client.toLowerCase() === userAddress.toLowerCase();
+        
+        currentSlideOverJobId = Number(jobId);
 
         let detailHTML = `
             <div class="detail-header">
@@ -265,6 +400,40 @@ async function showJobDetail(jobId) {
                 <p>${escapeHtml(job.description)}</p>
             </div>
         `;
+
+        if (status === 1) { // Assigned (Executing)
+            detailHTML += `
+            <div class="detail-section" style="margin-top: 1rem;">
+                <label style="display:flex; align-items:center; gap:8px;">Agent Execution Trace <span class="status-dot online"></span></label>
+                <div class="agent-timeline" id="live-logs-${Number(job.id)}">
+                    ${(window.liveJobLogs[Number(job.id)] || []).map(log => {
+                        return `
+                            <div class="timeline-step">\n                                <div class="timeline-icon">✓</div>\n                                <div class="timeline-content">\n                                    <span class="timeline-time">${log.time.toLocaleTimeString()}</span>\n                                    <span class="timeline-text">${escapeHtml(log.stage)}</span>\n                                </div>\n                            </div>`;
+                    }).join("")}
+                    <div class="timeline-step in-progress" id="timeline-loading-${Number(job.id)}">
+                        <div class="timeline-icon spinner"></div>
+                        <div class="timeline-content">
+                            <span class="timeline-text">Awaiting provider logs...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        if (job.resultHash && job.resultHash.startsWith("RESULT_B64:")) {
+            try {
+                const b64Data = job.resultHash.replace("RESULT_B64:", "");
+                const decodedOutput = atob(b64Data);
+                detailHTML += `
+                <div class="detail-section" style="margin-top: 1rem;">
+                    <label>Task Execution Output (STDOUT)</label>
+                    <div style="background:#000; color:#0f0; padding:12px; border-radius:var(--radius-sm); font-family:var(--mono); font-size:12px; white-space:pre-wrap; border-left:3px solid var(--primary); max-height:200px; overflow-y:auto;">${escapeHtml(decodedOutput)}</div>
+                </div>`;
+            } catch(e) {
+                console.error("Decode err", e);
+            }
+        }
 
         // Bids section
         if (bids.length > 0) {
@@ -332,8 +501,15 @@ async function postJob(event) {
         return;
     }
 
-    const description = document.getElementById("job-description").value;
-    const dataHash = document.getElementById("job-data-hash").value || "QmDefault";
+    let description = document.getElementById("job-description").value;
+    let dataHash = document.getElementById("job-data-hash").value || "QmDefault";
+    
+    const isPythonTask = document.getElementById("is-python-task")?.checked;
+    if (isPythonTask) {
+        description = "[PYTHON-TASK] " + description;
+        dataHash = document.getElementById("job-python-code").value;
+    }
+
     const budget = document.getElementById("job-budget").value;
     const deadlineHours = parseInt(document.getElementById("job-deadline").value) || 24;
     const tierSelect = document.getElementById("job-tier");

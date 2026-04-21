@@ -140,6 +140,11 @@ contract JobMarket is ReentrancyGuard {
         string resultHash
     );
 
+    event JobProgress(
+        uint256 indexed jobId,
+        string stage
+    );
+
     event JobCompleted(
         uint256 indexed jobId,
         address indexed client,
@@ -552,6 +557,17 @@ contract JobMarket is ReentrancyGuard {
         reputationContract.decrementReputation(job.assignedProvider);
 
         emit SLAViolation(_jobId, job.assignedProvider, job.slaDeadline);
+    }
+
+    /**
+     * @notice Allows the assigned provider to report real-time live progress.
+     */
+    function reportProgress(uint256 _jobId, string calldata _message) 
+        external 
+        jobExists(_jobId) 
+        onlyAssignedProvider(_jobId) 
+    {
+        emit JobProgress(_jobId, _message);
     }
 
     // ============ Admin Functions ============
