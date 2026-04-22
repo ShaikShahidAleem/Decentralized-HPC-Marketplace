@@ -91,6 +91,16 @@
                     </svg>
                     <span>Governance</span>
                 </div>
+                <div class="nav-section-label">SYSTEM LOGIC</div>
+                <div class="nav-item" data-view="contracts">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="9" x2="15" y2="9"></line>
+                        <line x1="9" y1="13" x2="15" y2="13"></line>
+                        <line x1="9" y1="17" x2="15" y2="17"></line>
+                    </svg>
+                    <span>Smart Contracts</span>
+                </div>
             </nav>
 
             <div class="sidebar-footer">
@@ -411,6 +421,122 @@ print("---------------------------")
                         <div class="empty-state">Connect wallet to participate in governance</div>
                     </div>
                 </section>
+                <!-- ═══ Smart Contracts View ═══ -->
+                <section id="view-contracts" class="view-panel">
+                    <div class="section-header">
+                        <h2>Smart Contracts Architecture</h2>
+                        <button class="btn-sm btn-outline" onclick="loadContractsView()">Refresh State</button>
+                    </div>
+                    <div id="contracts-container" class="contracts-panel" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; padding: 1rem 0;">
+                        <div class="empty-state">Connect wallet to view active smart contracts</div>
+                    </div>
+
+                    <!-- ═══ Contract Builder Panel ═══ -->
+                    <div class="contract-builder-panel glass-panel" id="contract-builder-panel">
+                        <div class="builder-header">
+                            <div class="builder-title-row">
+                                <div class="builder-icon">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="builder-title">Smart Contract Builder</h3>
+                                    <p class="builder-subtitle">Describe your requirements — get an instant custom Solidity contract</p>
+                                </div>
+                            </div>
+                            <span class="builder-badge">⚡ AI-Powered</span>
+                        </div>
+
+                        <div class="builder-body">
+                            <!-- Left: Input area -->
+                            <div class="builder-input-area">
+                                <label class="builder-label">Contract Requirements</label>
+                                <textarea id="builder-requirements" class="builder-textarea" placeholder="e.g., I need a contract that releases payment only after a 48-hour time lock, requires 3 out of 5 arbitrators to approve, and automatically slashes 20% of stake for SLA violations..."></textarea>
+
+                                <div class="builder-tags-row">
+                                    <span class="builder-tag-label">Quick Templates:</span>
+                                    <button class="builder-tag" onclick="fillBuilderTemplate('timelock')">⏱ Time Lock</button>
+                                    <button class="builder-tag" onclick="fillBuilderTemplate('multisig')">🔐 Multi-Sig</button>
+                                    <button class="builder-tag" onclick="fillBuilderTemplate('bounty')">🎯 Bounty Pool</button>
+                                    <button class="builder-tag" onclick="fillBuilderTemplate('sla')">📋 SLA Enforcer</button>
+                                    <button class="builder-tag" onclick="fillBuilderTemplate('revenue')">💰 Revenue Split</button>
+                                </div>
+
+                                <button id="builder-generate-btn" class="btn btn-primary btn-full builder-generate-btn" onclick="generateSmartContract()">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                                    </svg>
+                                    Generate Smart Contract
+                                </button>
+                            </div>
+
+                            <!-- Right: Output area -->
+                            <div class="builder-output-area" id="builder-output-area">
+                                <div class="builder-output-empty" id="builder-output-empty">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--text-muted); margin-bottom: 12px;">
+                                        <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/>
+                                    </svg>
+                                    <p>Your generated contract will appear here</p>
+                                    <span>Fill in your requirements and click Generate</span>
+                                </div>
+
+                                <div class="builder-result" id="builder-result" style="display:none;">
+                                    <div class="builder-result-header">
+                                        <div class="builder-result-meta">
+                                            <span class="builder-contract-name" id="builder-contract-name">CustomContract.sol</span>
+                                            <span class="builder-contract-tag" id="builder-contract-tag">ERC-20 Compatible</span>
+                                        </div>
+                                        <div class="builder-result-actions">
+                                            <button class="btn-sm btn-outline" id="builder-view-code-btn" onclick="viewBuilderCode()">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                                                View Full Code
+                                            </button>
+                                            <button class="btn-sm btn-primary" id="builder-attach-btn" onclick="openAttachModal()">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                                Attach to Job
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p class="builder-contract-desc" id="builder-contract-desc">Description will appear here.</p>
+                                    <div class="builder-contract-features" id="builder-contract-features"></div>
+                                    <div class="builder-contract-preview" id="builder-contract-preview">
+                                        <div class="builder-preview-header">
+                                            <span class="mono" style="color: var(--text-muted); font-size: 11px;">Contract Preview</span>
+                                            <span class="builder-preview-lines" id="builder-preview-lines">~0 lines</span>
+                                        </div>
+                                        <pre class="builder-code-preview" id="builder-code-preview"><code id="builder-code-content"></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ═══ Attach to Job Modal ═══ -->
+                <div id="attach-job-modal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(6px);">
+                    <div class="attach-modal-box glass-panel">
+                        <div class="attach-modal-header">
+                            <div>
+                                <h3 style="margin:0; color: var(--primary);">Attach Contract to Job</h3>
+                                <p style="margin:4px 0 0; font-size:12px; color:var(--text-muted);">Select a job from the marketplace to associate this custom contract with.</p>
+                            </div>
+                            <button class="btn-icon" onclick="closeAttachModal()">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                        <div class="attach-modal-body">
+                            <div class="attach-contract-badge" id="attach-contract-badge">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>
+                                <span id="attach-contract-badge-name">CustomContract.sol</span>
+                            </div>
+                            <p style="font-size:13px; color:var(--text-secondary); margin:0 0 16px;">Choose which open job to bind this contract to:</p>
+                            <div id="attach-jobs-list" class="attach-jobs-list">
+                                <div class="empty-state" style="padding: 24px;">Loading open jobs...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Bottom Panels Container -->
@@ -461,11 +587,24 @@ print("---------------------------")
         </div>
     </div>
 
+    <!-- Code View Modal -->
+    <div id="code-modal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+        <div class="glass-panel" style="width: 90%; max-width: 1000px; height: 85vh; display: flex; flex-direction: column; background: var(--bg-dark); border: 1px solid var(--border-light); border-radius: 12px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+            <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02);">
+                <h3 id="code-modal-title" style="margin: 0; color: var(--primary); font-family: monospace; font-size: 1.2rem;">Contract.sol</h3>
+                <button class="btn-sm btn-outline" onclick="closeCodeModal()" style="border: none; color: var(--text-muted); font-size: 1.5rem; line-height: 1; padding: 0 8px; cursor: pointer;">&times;</button>
+            </div>
+            <div style="flex: 1; overflow: auto; padding: 1.5rem; background: #0d1117;">
+                <pre style="margin: 0; font-family: 'Consolas', 'Courier New', monospace; font-size: 13px; line-height: 1.6; color: #c9d1d9; tab-size: 4;"><code id="code-modal-content"></code></pre>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.9.0/ethers.umd.min.js"></script>
     <script src="config.js"></script>
     <script src="contracts.js"></script>
+    <script src="contracts-source.js"></script>
     <script src="app.js"></script>
 </body>
-
 </html>

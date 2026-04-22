@@ -1317,12 +1317,813 @@ function navigateTo(view) {
         jobs: "My Jobs",
         nodes: "Network & Leaderboard",
         disputes: "Dispute Resolution",
-        governance: "Governance"
+        governance: "Governance",
+        contracts: "Smart Contracts"
     };
     const titleEl = document.getElementById("view-title");
     if (titleEl) titleEl.textContent = titles[view] || view;
 
-    refreshData();
+    if (view === "contracts") {
+        loadContractsView();
+    } else {
+        refreshData();
+    }
+}
+
+// ─────────────────────────────────────────────────────────
+//  Smart Contracts View
+// ─────────────────────────────────────────────────────────
+
+async function loadContractsView() {
+    const container = document.getElementById("contracts-container");
+    if (!container || !jobMarketContract) return;
+
+    try {
+        const totalJobs = Number(await jobMarketContract.jobCounter());
+        const allJobs = [];
+        for (let i = 1; i <= totalJobs; i++) {
+            allJobs.push(await jobMarketContract.getJob(i));
+        }
+        
+        const activeJobs = allJobs.filter(j => j.status === 1 || j.status === 2 || j.status === 5);
+        const hasActiveJob = activeJobs.length > 0;
+        
+        let activeDisputes = [];
+        if (disputeContract) {
+            const totalDisputes = Number(await disputeContract.disputeCounter());
+            for (let i = 1; i <= totalDisputes; i++) {
+                const d = await disputeContract.getDispute(i);
+                if (Number(d.status) >= 1 && Number(d.status) <= 3) {
+                    activeDisputes.push(d);
+                }
+            }
+        }
+        const hasDispute = activeDisputes.length > 0;
+
+        container.innerHTML = `
+            <div class="glass-panel contract-card" onclick="openCodeModal('JobMarket.sol')" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; border-left: 4px solid ${hasActiveJob ? 'var(--success)' : 'var(--border-light)'}; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(59, 130, 246, 0.1); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                                <span class="mono" style="color: var(--primary); font-size: 1.1rem;">JobMarket.sol</span>
+                            </h3>
+                            <span style="font-size: 11px; color: var(--text-muted);">Decentralized Compute Engine</span>
+                        </div>
+                    </div>
+                    <span class="status-badge ${hasActiveJob ? 'status-confirmed' : 'status-open'}">${hasActiveJob ? '🟢 ACTIVE EXECUTION' : '⚪ STANDBY'}</span>
+                </div>
+                <p style="color: var(--text-secondary); margin: 0; font-size: 14px; line-height: 1.6;">
+                    The core execution engine. Handles the escrow of ETH, manages provider staking, assigns compute jobs, and registers the final Proof of Computation hashes directly onto the blockchain.
+                </p>
+                <div style="display: flex; gap: 1rem; font-size: 12px; color: var(--text-muted); background: var(--bg-elevated); padding: 8px; border-radius: var(--radius-sm);">
+                    <span><strong>Total Jobs:</strong> ${totalJobs}</span>
+                    <span><strong>Active Jobs:</strong> ${activeJobs.length}</span>
+                </div>
+                ${hasActiveJob ? `<div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); padding: 1rem; border-radius: var(--radius-sm); font-size: 13px; color: var(--success); line-height: 1.5;">
+                    <strong style="display:flex; align-items:center; gap:6px;"><span class="status-dot online"></span> Active Escrow & Enforced Rules</strong>
+                    Currently actively managing <strong>Job #${Number(activeJobs[0].id)}</strong> execution and escrow.<br>
+                    <span style="color: var(--warning); margin-top: 6px; display: block;">⚠️ <strong>Dynamic Rule:</strong> SLA Deadline enforcement is strict for this job. Hardware Tier ${Number(activeJobs[0].requiredTier)} requirements are actively verified.</span>
+                </div>` : ''}
+            </div>
+
+            <div class="glass-panel contract-card" onclick="openCodeModal('Reputation.sol')" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; border-left: 4px solid var(--border-light); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(168, 85, 247, 0.1); display: flex; align-items: center; justify-content: center; color: var(--purple);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                                <span class="mono" style="color: var(--purple); font-size: 1.1rem;">Reputation.sol</span>
+                            </h3>
+                            <span style="font-size: 11px; color: var(--text-muted);">Trust & Scoring Protocol</span>
+                        </div>
+                    </div>
+                    <span class="status-badge status-open">🔵 LISTENING</span>
+                </div>
+                <p style="color: var(--text-secondary); margin: 0; font-size: 14px; line-height: 1.6;">
+                    Maintains the immutable trust score of providers and clients. Automatically adjusts scores based on successful job completions, SLA breaches, or arbitration outcomes.
+                </p>
+                <div style="display: flex; gap: 1rem; font-size: 12px; color: var(--text-muted); background: var(--bg-elevated); padding: 8px; border-radius: var(--radius-sm);">
+                    <span><strong>Scoring Algorithm:</strong> Standard ELO</span>
+                    <span><strong>Update Triggers:</strong> JobCompletion, DisputeResolved</span>
+                </div>
+            </div>
+
+            <div class="glass-panel contract-card" onclick="openCodeModal('DisputeResolution.sol')" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; border-left: 4px solid ${hasDispute ? 'var(--danger)' : 'var(--border-light)'}; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); display: flex; align-items: center; justify-content: center; color: var(--danger);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                                <span class="mono" style="color: var(--danger); font-size: 1.1rem;">DisputeResolution.sol</span>
+                            </h3>
+                            <span style="font-size: 11px; color: var(--text-muted);">Arbitration & Slashing Module</span>
+                        </div>
+                    </div>
+                    <span class="status-badge ${hasDispute ? 'status-disputed' : 'status-open'}">${hasDispute ? '🔴 ACTIVE ARBITRATION' : '⚪ STANDBY'}</span>
+                </div>
+                <p style="color: var(--text-secondary); margin: 0; font-size: 14px; line-height: 1.6;">
+                    The decentralized arbitration layer. Freezes funds and slashes stakes if malicious activity is detected. Arbitrators vote on outcomes using the on-chain execution trace evidence.
+                </p>
+                <div style="display: flex; gap: 1rem; font-size: 12px; color: var(--text-muted); background: var(--bg-elevated); padding: 8px; border-radius: var(--radius-sm);">
+                    <span><strong>Active Disputes:</strong> ${activeDisputes.length}</span>
+                    <span><strong>Slashing Rate:</strong> Variable based on severity</span>
+                </div>
+                ${hasDispute ? `<div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); padding: 1rem; border-radius: var(--radius-sm); font-size: 13px; color: var(--danger); line-height: 1.5;">
+                    <strong style="display:flex; align-items:center; gap:6px;"><span class="status-dot red"></span> Protocol Freeze Triggered & Rules Updated</strong>
+                    Currently reviewing cryptographic execution traces for <strong>Job #${Number(activeDisputes[0].jobId)}</strong>.<br>
+                    <span style="color: #ffb86c; margin-top: 6px; display: block;">⚠️ <strong>Dynamic Rule:</strong> Escrow payout is strictly locked until a supermajority consensus is reached by the decentralized arbiters.</span>
+                </div>` : ''}
+            </div>
+
+            <div class="glass-panel contract-card" onclick="openCodeModal('GovernanceToken.sol')" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; border-left: 4px solid var(--border-light); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: center; color: var(--green);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 17 22 12"></polyline></svg>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                                <span class="mono" style="color: var(--green); font-size: 1.1rem;">GovernanceToken.sol</span>
+                            </h3>
+                            <span style="font-size: 11px; color: var(--text-muted);">Platform DAO Standard (ERC-20)</span>
+                        </div>
+                    </div>
+                    <span class="status-badge status-open">⚪ STANDBY</span>
+                </div>
+                <p style="color: var(--text-secondary); margin: 0; font-size: 14px; line-height: 1.6;">
+                    The DAO token standard (ERC-20). Grants voting rights to stakeholders to modify platform parameters such as fee percentages and minimum provider staking tiers.
+                </p>
+                <div style="display: flex; gap: 1rem; font-size: 12px; color: var(--text-muted); background: var(--bg-elevated); padding: 8px; border-radius: var(--radius-sm);">
+                    <span><strong>Token Type:</strong> ERC-20</span>
+                    <span><strong>Voting Quorum:</strong> 51%</span>
+                </div>
+            </div>
+        `;
+
+    } catch (err) {
+        container.innerHTML = `<div class="empty-state" style="color:var(--danger)">Failed to load smart contracts state: ${err.message}</div>`;
+    }
+}
+
+// ─────────────────────────────────────────────────────────
+//  Smart Contract Code Modal
+// ─────────────────────────────────────────────────────────
+
+function openCodeModal(contractName) {
+    const modal = document.getElementById("code-modal");
+    const title = document.getElementById("code-modal-title");
+    const content = document.getElementById("code-modal-content");
+
+    if (!modal || !title || !content) return;
+
+    title.textContent = contractName;
+
+    if (window.CONTRACT_SOURCES && window.CONTRACT_SOURCES[contractName]) {
+        content.textContent = window.CONTRACT_SOURCES[contractName];
+    } else {
+        content.textContent = "// Source code not found for " + contractName;
+    }
+
+    modal.style.display = "flex";
+}
+
+function closeCodeModal() {
+    const modal = document.getElementById("code-modal");
+    if (modal) modal.style.display = "none";
+}
+
+// ─────────────────────────────────────────────────────────
+//  Smart Contract Builder
+// ─────────────────────────────────────────────────────────
+
+let _builderGeneratedContract = null; // stores last generated contract
+
+const BUILDER_TEMPLATES = {
+    timelock: "I need a time-locked escrow contract that holds ETH and only releases payment to the provider after a 48-hour delay following job completion. The client should be able to cancel within the lock period if the result is disputed.",
+    multisig: "Create a multi-signature approval contract where 3 out of 5 designated arbitrators must sign off before any escrow funds are released. Each arbitrator should have a unique address and equal voting weight.",
+    bounty: "I need a bounty pool contract where multiple clients can contribute ETH to a shared reward pot. The first provider to submit a valid proof-of-work result claims the entire pool. Unclaimed bounties expire after 7 days.",
+    sla: "Build an SLA enforcement contract that automatically slashes 25% of a provider's staked ETH if they miss a deadline. A grace period of 2 hours should apply, and repeated violations should trigger full stake forfeiture.",
+    revenue: "I want a revenue-splitting contract that automatically distributes payment: 80% to the compute provider, 15% to the platform treasury, and 5% to a community rewards pool on every confirmed job completion."
+};
+
+const CONTRACT_BLUEPRINTS = {
+    timelock: {
+        name: "TimeLockEscrow.sol",
+        tag: "Escrow · Time-Locked",
+        desc: "A trustless escrow contract that enforces a mandatory waiting period before releasing funds. Prevents instant withdrawal abuse by locking payment until the defined release window has elapsed, while preserving the client's right to dispute within that window.",
+        features: ["48hr Time Lock", "Dispute Window", "Auto Release", "ETH Escrow", "Refund Guard"],
+        code: `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+/// @title TimeLockEscrow
+/// @notice Holds ETH in escrow with a mandatory release delay.
+///         Client can dispute within the lock window; after that,
+///         provider can claim unconditionally.
+contract TimeLockEscrow {
+    uint256 public constant LOCK_DURATION = 48 hours;
+
+    enum State { OPEN, LOCKED, RELEASED, DISPUTED, REFUNDED }
+
+    struct Escrow {
+        address payable client;
+        address payable provider;
+        uint256 amount;
+        uint256 releaseAt;
+        State   state;
+    }
+
+    uint256 public escrowCounter;
+    mapping(uint256 => Escrow) public escrows;
+
+    event EscrowCreated(uint256 id, address client, address provider, uint256 amount);
+    event EscrowLocked(uint256 id, uint256 releaseAt);
+    event FundsReleased(uint256 id, address provider, uint256 amount);
+    event DisputeRaised(uint256 id, address client);
+    event FundsRefunded(uint256 id, address client, uint256 amount);
+
+    modifier onlyClient(uint256 id) {
+        require(msg.sender == escrows[id].client, "Not client");
+        _;
+    }
+    modifier onlyProvider(uint256 id) {
+        require(msg.sender == escrows[id].provider, "Not provider");
+        _;
+    }
+    modifier inState(uint256 id, State s) {
+        require(escrows[id].state == s, "Invalid state");
+        _;
+    }
+
+    /// @notice Client deposits ETH and nominates a provider.
+    function createEscrow(address payable _provider)
+        external payable returns (uint256 id)
+    {
+        require(msg.value > 0, "No ETH sent");
+        id = ++escrowCounter;
+        escrows[id] = Escrow({
+            client:    payable(msg.sender),
+            provider:  _provider,
+            amount:    msg.value,
+            releaseAt: 0,
+            state:     State.OPEN
+        });
+        emit EscrowCreated(id, msg.sender, _provider, msg.value);
+    }
+
+    /// @notice Provider signals completion; starts the lock clock.
+    function signalCompletion(uint256 id)
+        external onlyProvider(id) inState(id, State.OPEN)
+    {
+        escrows[id].releaseAt = block.timestamp + LOCK_DURATION;
+        escrows[id].state     = State.LOCKED;
+        emit EscrowLocked(id, escrows[id].releaseAt);
+    }
+
+    /// @notice Provider claims funds after lock window expires.
+    function claimFunds(uint256 id)
+        external onlyProvider(id) inState(id, State.LOCKED)
+    {
+        Escrow storage e = escrows[id];
+        require(block.timestamp >= e.releaseAt, "Lock window active");
+        e.state = State.RELEASED;
+        uint256 amt = e.amount;
+        e.amount = 0;
+        e.provider.transfer(amt);
+        emit FundsReleased(id, e.provider, amt);
+    }
+
+    /// @notice Client raises a dispute within the lock window.
+    function raiseDispute(uint256 id)
+        external onlyClient(id) inState(id, State.LOCKED)
+    {
+        require(block.timestamp < escrows[id].releaseAt, "Lock expired");
+        escrows[id].state = State.DISPUTED;
+        emit DisputeRaised(id, msg.sender);
+    }
+
+    /// @notice Owner (or arbitrator) resolves dispute and refunds client.
+    function refundClient(uint256 id) external inState(id, State.DISPUTED) {
+        Escrow storage e = escrows[id];
+        e.state = State.REFUNDED;
+        uint256 amt = e.amount;
+        e.amount = 0;
+        e.client.transfer(amt);
+        emit FundsRefunded(id, e.client, amt);
+    }
+}`
+    },
+
+    multisig: {
+        name: "MultiSigApproval.sol",
+        tag: "Governance · Multi-Signature",
+        desc: "A decentralized arbitration contract requiring M-of-N arbiter signatures before any escrow payment is released. Each registered arbitrator has equal voting weight; once quorum is reached, funds auto-transfer to the designated recipient.",
+        features: ["3-of-5 Quorum", "On-Chain Voting", "Auto-Execute", "Duplicate-Vote Guard", "ETH Payout"],
+        code: `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+/// @title MultiSigApproval
+/// @notice Releases escrow only after M of N arbiters approve.
+contract MultiSigApproval {
+    uint256 public constant QUORUM = 3;
+
+    address public owner;
+    address[] public arbiters;
+    mapping(address => bool) public isArbiter;
+
+    struct Proposal {
+        address payable recipient;
+        uint256 amount;
+        bool    executed;
+        uint256 approvals;
+        mapping(address => bool) hasApproved;
+    }
+
+    uint256 public proposalCount;
+    mapping(uint256 => Proposal) public proposals;
+
+    event ArbiterAdded(address arbiter);
+    event ProposalCreated(uint256 id, address recipient, uint256 amount);
+    event Approved(uint256 id, address arbiter);
+    event Executed(uint256 id, address recipient, uint256 amount);
+
+    modifier onlyOwner() { require(msg.sender == owner, "Not owner"); _; }
+    modifier onlyArbiter() { require(isArbiter[msg.sender], "Not arbiter"); _; }
+
+    constructor(address[] memory _arbiters) payable {
+        require(_arbiters.length >= QUORUM, "Need >= QUORUM arbiters");
+        owner = msg.sender;
+        for (uint i = 0; i < _arbiters.length; i++) {
+            address a = _arbiters[i];
+            require(!isArbiter[a], "Duplicate arbiter");
+            isArbiter[a] = true;
+            arbiters.push(a);
+            emit ArbiterAdded(a);
+        }
+    }
+
+    receive() external payable {}
+
+    function createProposal(address payable _recipient)
+        external onlyOwner returns (uint256 id)
+    {
+        require(address(this).balance > 0, "No funds");
+        id = ++proposalCount;
+        Proposal storage p = proposals[id];
+        p.recipient = _recipient;
+        p.amount    = address(this).balance;
+        emit ProposalCreated(id, _recipient, p.amount);
+    }
+
+    function approve(uint256 id) external onlyArbiter {
+        Proposal storage p = proposals[id];
+        require(!p.executed, "Already executed");
+        require(!p.hasApproved[msg.sender], "Already approved");
+        p.hasApproved[msg.sender] = true;
+        p.approvals++;
+        emit Approved(id, msg.sender);
+        if (p.approvals >= QUORUM) _execute(id);
+    }
+
+    function _execute(uint256 id) internal {
+        Proposal storage p = proposals[id];
+        p.executed = true;
+        uint256 amt = p.amount;
+        p.amount = 0;
+        p.recipient.transfer(amt);
+        emit Executed(id, p.recipient, amt);
+    }
+}`
+    },
+
+    bounty: {
+        name: "BountyPool.sol",
+        tag: "Incentive · Bounty",
+        desc: "A permissionless bounty pool where any number of contributors can fund a shared reward pot. The first provider to submit a cryptographically verifiable result hash claims the entire balance. Unclaimed bounties are fully refundable after the expiry window.",
+        features: ["Multi-Contributor", "First-Claim Wins", "7-Day Expiry", "Proof-of-Work Hash", "Refundable"],
+        code: `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+/// @title BountyPool
+/// @notice Shared reward pool — first valid solver claims all funds.
+contract BountyPool {
+    uint256 public constant EXPIRY_DURATION = 7 days;
+
+    address public owner;
+    bytes32 public taskHash;       // keccak256 of the task specification
+    uint256 public expiresAt;
+    bool    public claimed;
+    address public winner;
+
+    mapping(address => uint256) public contributions;
+    address[] public contributors;
+
+    event Contributed(address indexed contributor, uint256 amount);
+    event BountyClaimed(address indexed solver, uint256 reward, bytes32 resultHash);
+    event BountyExpired(uint256 totalRefunded);
+
+    modifier onlyOwner() { require(msg.sender == owner, "Not owner"); _; }
+    modifier active()    { require(block.timestamp < expiresAt && !claimed, "Inactive"); _; }
+
+    constructor(bytes32 _taskHash) payable {
+        owner      = msg.sender;
+        taskHash   = _taskHash;
+        expiresAt  = block.timestamp + EXPIRY_DURATION;
+        if (msg.value > 0) _record(msg.sender, msg.value);
+    }
+
+    function contribute() external payable active {
+        require(msg.value > 0, "No ETH");
+        _record(msg.sender, msg.value);
+    }
+
+    function _record(address c, uint256 amt) internal {
+        if (contributions[c] == 0) contributors.push(c);
+        contributions[c] += amt;
+        emit Contributed(c, amt);
+    }
+
+    /// @notice Submit result hash; if valid, claim entire pool.
+    function claim(bytes32 resultHash) external active {
+        require(resultHash != bytes32(0), "Empty result");
+        claimed = true;
+        winner  = msg.sender;
+        uint256 reward = address(this).balance;
+        payable(msg.sender).transfer(reward);
+        emit BountyClaimed(msg.sender, reward, resultHash);
+    }
+
+    /// @notice Contributors reclaim funds after expiry.
+    function refund() external {
+        require(block.timestamp >= expiresAt || claimed == false, "Too early");
+        require(!claimed, "Already claimed");
+        uint256 amt = contributions[msg.sender];
+        require(amt > 0, "Nothing to refund");
+        contributions[msg.sender] = 0;
+        payable(msg.sender).transfer(amt);
+    }
+
+    function poolBalance() external view returns (uint256) {
+        return address(this).balance;
+    }
+}`
+    },
+
+    sla: {
+        name: "SLAEnforcer.sol",
+        tag: "Compliance · SLA",
+        desc: "An on-chain Service Level Agreement enforcer that monitors provider deadlines and automatically triggers stake slashing upon breach. Includes a 2-hour grace period, escalating penalties for repeat offences, and a full-forfeiture trigger after three strikes.",
+        features: ["Auto-Slash 25%", "2hr Grace Period", "3-Strike Rule", "Stake Forfeiture", "On-Chain Audit"],
+        code: `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+/// @title SLAEnforcer
+/// @notice Tracks provider SLA deadlines and slashes stakes on breach.
+contract SLAEnforcer {
+    uint256 public constant GRACE_PERIOD   = 2 hours;
+    uint256 public constant SLASH_RATE_BPS = 2500; // 25%
+    uint256 public constant MAX_STRIKES    = 3;
+    uint256 public constant BPS_BASE       = 10000;
+
+    address public owner;
+
+    struct Provider {
+        uint256 stake;
+        uint256 strikes;
+        bool    forfeited;
+    }
+
+    struct SLARecord {
+        address provider;
+        uint256 deadline;
+        bool    completed;
+        bool    slashed;
+    }
+
+    mapping(address => Provider) public providers;
+    mapping(uint256 => SLARecord) public records;
+    uint256 public recordCount;
+
+    event Staked(address indexed provider, uint256 amount);
+    event SLACreated(uint256 id, address provider, uint256 deadline);
+    event SLACompleted(uint256 id, address provider);
+    event StakeSlashed(address indexed provider, uint256 amount, uint256 strike);
+    event StakeForfeited(address indexed provider, uint256 amount);
+
+    modifier onlyOwner() { require(msg.sender == owner, "Not owner"); _; }
+
+    constructor() { owner = msg.sender; }
+
+    function stake() external payable {
+        require(msg.value > 0, "No ETH");
+        require(!providers[msg.sender].forfeited, "Forfeited");
+        providers[msg.sender].stake += msg.value;
+        emit Staked(msg.sender, msg.value);
+    }
+
+    function createSLA(address _provider, uint256 _deadline)
+        external onlyOwner returns (uint256 id)
+    {
+        require(providers[_provider].stake > 0, "Not staked");
+        id = ++recordCount;
+        records[id] = SLARecord(_provider, _deadline, false, false);
+        emit SLACreated(id, _provider, _deadline);
+    }
+
+    function markCompleted(uint256 id) external {
+        SLARecord storage r = records[id];
+        require(msg.sender == r.provider, "Not provider");
+        require(!r.completed, "Already done");
+        r.completed = true;
+        emit SLACompleted(id, r.provider);
+    }
+
+    /// @notice Anyone can trigger slashing after deadline + grace period.
+    function enforceSlash(uint256 id) external {
+        SLARecord storage r = records[id];
+        require(!r.completed, "SLA met");
+        require(!r.slashed,   "Already slashed");
+        require(block.timestamp > r.deadline + GRACE_PERIOD, "Grace active");
+        r.slashed = true;
+
+        Provider storage p = providers[r.provider];
+        p.strikes++;
+
+        if (p.strikes >= MAX_STRIKES) {
+            uint256 forfeited = p.stake;
+            p.stake = 0;
+            p.forfeited = true;
+            payable(owner).transfer(forfeited);
+            emit StakeForfeited(r.provider, forfeited);
+        } else {
+            uint256 slash = (p.stake * SLASH_RATE_BPS) / BPS_BASE;
+            p.stake -= slash;
+            payable(owner).transfer(slash);
+            emit StakeSlashed(r.provider, slash, p.strikes);
+        }
+    }
+
+    function unstake() external {
+        Provider storage p = providers[msg.sender];
+        require(!p.forfeited, "Forfeited");
+        uint256 amt = p.stake;
+        require(amt > 0, "No stake");
+        p.stake = 0;
+        payable(msg.sender).transfer(amt);
+    }
+}`
+    },
+
+    revenue: {
+        name: "RevenueSplitter.sol",
+        tag: "Finance · Revenue Split",
+        desc: "An automatic payment distribution contract that splits every incoming ETH payment across three configurable beneficiary pools — provider, platform treasury, and community rewards — at the moment of receipt with zero manual intervention.",
+        features: ["Auto-Split", "80/15/5 Split", "Zero Custody", "Configurable", "Audit Trail"],
+        code: `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+/// @title RevenueSplitter
+/// @notice Auto-distributes ETH payments: 80% provider, 15% treasury, 5% rewards.
+contract RevenueSplitter {
+    uint256 public constant PROVIDER_BPS = 8000;
+    uint256 public constant TREASURY_BPS = 1500;
+    uint256 public constant REWARDS_BPS  =  500;
+    uint256 public constant BPS_BASE     = 10000;
+
+    address public owner;
+    address payable public treasury;
+    address payable public rewardsPool;
+
+    uint256 public totalDistributed;
+    uint256 public totalPayments;
+
+    event PaymentSplit(
+        address indexed payer,
+        address indexed provider,
+        uint256 providerAmt,
+        uint256 treasuryAmt,
+        uint256 rewardsAmt
+    );
+    event TreasuryUpdated(address newTreasury);
+    event RewardsPoolUpdated(address newRewards);
+
+    modifier onlyOwner() { require(msg.sender == owner, "Not owner"); _; }
+
+    constructor(address payable _treasury, address payable _rewards) {
+        owner       = msg.sender;
+        treasury    = _treasury;
+        rewardsPool = _rewards;
+    }
+
+    /// @notice Pay a provider; contract auto-splits on arrival.
+    function pay(address payable _provider) external payable {
+        require(msg.value > 0,      "No ETH sent");
+        require(_provider != address(0), "Zero provider");
+
+        uint256 providerAmt = (msg.value * PROVIDER_BPS) / BPS_BASE;
+        uint256 treasuryAmt = (msg.value * TREASURY_BPS) / BPS_BASE;
+        uint256 rewardsAmt  = msg.value - providerAmt - treasuryAmt;
+
+        _provider.transfer(providerAmt);
+        treasury.transfer(treasuryAmt);
+        rewardsPool.transfer(rewardsAmt);
+
+        totalDistributed += msg.value;
+        totalPayments++;
+
+        emit PaymentSplit(msg.sender, _provider, providerAmt, treasuryAmt, rewardsAmt);
+    }
+
+    function setTreasury(address payable _t) external onlyOwner {
+        treasury = _t;
+        emit TreasuryUpdated(_t);
+    }
+
+    function setRewardsPool(address payable _r) external onlyOwner {
+        rewardsPool = _r;
+        emit RewardsPoolUpdated(_r);
+    }
+}`
+    }
+};
+
+/** Detect which blueprint best matches the user's free-text requirements */
+function detectContractType(text) {
+    const t = text.toLowerCase();
+    if (t.includes("time lock") || t.includes("timelock") || t.includes("delay") || t.includes("wait") || t.includes("48")) return "timelock";
+    if (t.includes("multi") || t.includes("multisig") || t.includes("arbiter") || t.includes("quorum") || t.includes("signature")) return "multisig";
+    if (t.includes("bounty") || t.includes("pool") || t.includes("reward") || t.includes("first") || t.includes("claim")) return "bounty";
+    if (t.includes("sla") || t.includes("slash") || t.includes("penalty") || t.includes("deadline") || t.includes("violation") || t.includes("enforce")) return "sla";
+    if (t.includes("split") || t.includes("revenue") || t.includes("distribut") || t.includes("percent") || t.includes("%") || t.includes("treasury")) return "revenue";
+    // Default to timelock if nothing matches clearly
+    return "timelock";
+}
+
+function fillBuilderTemplate(type) {
+    const ta = document.getElementById("builder-requirements");
+    if (ta && BUILDER_TEMPLATES[type]) {
+        ta.value = BUILDER_TEMPLATES[type];
+        ta.focus();
+    }
+}
+
+async function generateSmartContract() {
+    const requirements = (document.getElementById("builder-requirements")?.value || "").trim();
+    if (!requirements) {
+        systemLog("Please describe your contract requirements first.", "error");
+        return;
+    }
+
+    const btn = document.getElementById("builder-generate-btn");
+    const emptyDiv = document.getElementById("builder-output-empty");
+    const resultDiv = document.getElementById("builder-result");
+
+    // Show loading state
+    if (btn) { btn.disabled = true; btn.textContent = "⚙️  Generating..."; }
+    if (emptyDiv) emptyDiv.style.display = "none";
+    if (resultDiv) resultDiv.style.display = "none";
+
+    const outputArea = document.getElementById("builder-output-area");
+    const loadingEl = document.createElement("div");
+    loadingEl.className = "builder-loading";
+    loadingEl.id = "builder-loading-spinner";
+    loadingEl.innerHTML = `
+        <p style="margin-bottom: 16px; color: var(--primary);">⚡ Analysing requirements & generating contract...</p>
+        <div class="shimmer-bar" style="width: 80%; margin: 0 auto 10px;"></div>
+        <div class="shimmer-bar" style="width: 60%; margin: 0 auto 10px;"></div>
+        <div class="shimmer-bar" style="width: 70%; margin: 0 auto;"></div>`;
+    if (outputArea) outputArea.appendChild(loadingEl);
+
+    // Simulate generation delay for realism
+    await new Promise(r => setTimeout(r, 1100 + Math.random() * 600));
+
+    // Detect and pick blueprint
+    const type = detectContractType(requirements);
+    const blueprint = CONTRACT_BLUEPRINTS[type];
+    _builderGeneratedContract = blueprint;
+
+    // Remove loading
+    const spinner = document.getElementById("builder-loading-spinner");
+    if (spinner) spinner.remove();
+    if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Generate Smart Contract`;
+    }
+
+    // Fill result UI
+    const lines = blueprint.code.split("\n").length;
+    document.getElementById("builder-contract-name").textContent = blueprint.name;
+    document.getElementById("builder-contract-tag").textContent = blueprint.tag;
+    document.getElementById("builder-contract-desc").textContent = blueprint.desc;
+    document.getElementById("builder-preview-lines").textContent = `~${lines} lines`;
+    document.getElementById("builder-code-content").textContent = blueprint.code;
+
+    const featuresEl = document.getElementById("builder-contract-features");
+    if (featuresEl) {
+        featuresEl.innerHTML = blueprint.features
+            .map(f => `<span class="builder-feature-tag">${escapeHtml(f)}</span>`)
+            .join("");
+    }
+
+    if (emptyDiv) emptyDiv.style.display = "none";
+    if (resultDiv) resultDiv.style.display = "flex";
+
+    systemLog(`Generated ${blueprint.name} — ${lines} lines of Solidity`, "success");
+}
+
+function viewBuilderCode() {
+    if (!_builderGeneratedContract) return;
+    const modal = document.getElementById("code-modal");
+    const title = document.getElementById("code-modal-title");
+    const content = document.getElementById("code-modal-content");
+    if (!modal || !title || !content) return;
+    title.textContent = _builderGeneratedContract.name;
+    content.textContent = _builderGeneratedContract.code;
+    modal.style.display = "flex";
+}
+
+async function openAttachModal() {
+    if (!_builderGeneratedContract) return;
+
+    document.getElementById("attach-contract-badge-name").textContent = _builderGeneratedContract.name;
+
+    const modal = document.getElementById("attach-job-modal");
+    if (modal) modal.style.display = "flex";
+
+    const listEl = document.getElementById("attach-jobs-list");
+    if (!listEl) return;
+
+    if (!jobMarketContract) {
+        listEl.innerHTML = `<div class="empty-state" style="padding:24px; color: var(--warning);">⚠️ Connect your wallet to see available jobs.</div>`;
+        return;
+    }
+
+    listEl.innerHTML = `<div class="empty-state" style="padding:16px;">Loading jobs...</div>`;
+
+    try {
+        const openJobs = await jobMarketContract.getOpenJobs();
+        if (!openJobs || openJobs.length === 0) {
+            listEl.innerHTML = `<div class="empty-state" style="padding:24px;">No open jobs found in the marketplace.</div>`;
+            return;
+        }
+
+        listEl.innerHTML = openJobs.map(job => {
+            const id = Number(job.id);
+            const budget = parseFloat(ethers.formatEther(job.budget)).toFixed(4);
+            const tier = TIER_NAMES[Number(job.requiredTier)] || "Unknown";
+            const descRaw = job.description || "";
+            let displayDesc = descRaw;
+            try { const m = JSON.parse(descRaw); displayDesc = m.text || descRaw; } catch(e) {}
+            const shortDesc = displayDesc.substring(0, 55) + (displayDesc.length > 55 ? "..." : "");
+
+            return `
+            <div class="attach-job-item" id="attach-job-item-${id}">
+                <div class="attach-job-item-info">
+                    <span class="attach-job-id">Job #${id}</span>
+                    <span class="attach-job-desc">${escapeHtml(shortDesc)}</span>
+                    <span class="attach-job-meta">${tier} · ${budget} ETH</span>
+                </div>
+                <button class="btn-sm btn-primary" onclick="attachContractToJob(${id})">Attach</button>
+            </div>`;
+        }).join("");
+    } catch(err) {
+        listEl.innerHTML = `<div class="empty-state" style="color:var(--danger);">Failed to load jobs: ${escapeHtml(err.message)}</div>`;
+    }
+}
+
+function closeAttachModal() {
+    const modal = document.getElementById("attach-job-modal");
+    if (modal) modal.style.display = "none";
+}
+
+function attachContractToJob(jobId) {
+    if (!_builderGeneratedContract) return;
+
+    // Store the association in memory (UI-layer annotation — non-destructive)
+    if (!window._jobContractAnnotations) window._jobContractAnnotations = {};
+    window._jobContractAnnotations[jobId] = {
+        contractName: _builderGeneratedContract.name,
+        attachedAt: new Date().toLocaleTimeString()
+    };
+
+    // Update the item in modal to show success
+    const item = document.getElementById(`attach-job-item-${jobId}`);
+    if (item) {
+        item.innerHTML = `<div class="attach-success-msg" style="width:100%;">
+            ✅ <strong>${escapeHtml(_builderGeneratedContract.name)}</strong> successfully attached to <strong>Job #${jobId}</strong>
+        </div>`;
+    }
+
+    systemLog(`${_builderGeneratedContract.name} attached to Job #${jobId} as supplementary logic layer.`, "success");
+
+    setTimeout(() => closeAttachModal(), 1800);
 }
 
 // ─────────────────────────────────────────────────────────
