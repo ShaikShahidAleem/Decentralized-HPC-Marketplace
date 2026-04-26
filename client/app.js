@@ -113,7 +113,7 @@ async function initWeb3(method = 'metamask') {
         // Auto-assign role based on wallet index if using local simulation
         if (method === 'local') {
             const index = arguments.length > 1 ? arguments[1] : 0;
-            if (index === 2 || index === 4) {
+            if (index === 1 || index === 3) {
                 currentRole = 'PROVIDER';
             } else {
                 currentRole = 'CLIENT';
@@ -1276,17 +1276,38 @@ async function startProviderExecution(jobId, descriptionStr) {
     }
 
     try {
-        const response = await fetch(`http://127.0.0.1:${port}/execute`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ jobId, jobMetadata: descriptionStr })
-        });
-        
-        if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || "Unknown error");
+        // Try localhost first (same origin as the page served by http-server),
+        // then fall back to 127.0.0.1. Both resolve to the same machine but
+        // modern browsers enforce CORS between them.
+        const hosts = ['localhost', '127.0.0.1'];
+        let response = null;
+        let lastErr = null;
+
+        for (const host of hosts) {
+            try {
+                response = await fetch(`http://${host}:${port}/execute`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ jobId, jobMetadata: descriptionStr })
+                });
+                break; // success — stop trying
+            } catch (e) {
+                lastErr = e;
+            }
         }
-        
+
+        if (!response) {
+            throw new Error(
+                `Provider API unreachable on port ${port}. ` +
+                `Make sure the provider node is running (npm run provider) and try again.`
+            );
+        }
+
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.error || `HTTP ${response.status}`);
+        }
+
         systemLog(`Execution started! Provider Node is running the workflow.`, "success");
     } catch (err) {
         systemLog("Execution trigger failed: " + err.message, "error");

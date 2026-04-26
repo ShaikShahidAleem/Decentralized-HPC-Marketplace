@@ -639,14 +639,27 @@ class ComputeProviderNode {
 
     // ─── HTTP API Server ───
     startApiServer() {
-        const server = http.createServer(async (req, res) => {
+        const setCORS = (res) => {
             res.setHeader('Access-Control-Allow-Origin', '*');
-            res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-            res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+            res.setHeader('Access-Control-Max-Age', '86400');
+        };
 
+        const server = http.createServer(async (req, res) => {
+            setCORS(res);
+
+            // Handle CORS preflight
             if (req.method === 'OPTIONS') {
-                res.writeHead(200);
+                res.writeHead(204);
                 res.end();
+                return;
+            }
+
+            // Health check
+            if (req.method === 'GET' && req.url === '/health') {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ status: 'ok', provider: this.providerName, port: this.apiPort }));
                 return;
             }
 
@@ -658,27 +671,38 @@ class ComputeProviderNode {
                         const data = JSON.parse(body);
                         const jobId = data.jobId;
                         const metadata = data.jobMetadata;
-                        
+
                         this.log.info(`Received API request to execute job #${jobId}`);
-                        
+
                         // Run in background so request can return immediately
-                        this.executeJob(jobId, metadata);
-                        
+                        this.executeJob(jobId, metadata).catch(err =>
+                            this.log.error(`Background execution error for job #${jobId}`, { error: err.message })
+                        );
+
                         res.writeHead(200, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ success: true, message: 'Execution started' }));
+                        res.end(JSON.stringify({ success: true, message: `Execution started for job #${jobId}` }));
                     } catch (e) {
                         res.writeHead(400, { 'Content-Type': 'application/json' });
                         res.end(JSON.stringify({ error: e.message }));
                     }
                 });
             } else {
-                res.writeHead(404);
-                res.end();
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Not found' }));
             }
         });
 
-        server.listen(this.apiPort, '127.0.0.1', () => {
+        // Bind to all interfaces so both localhost and 127.0.0.1 resolve correctly
+        server.listen(this.apiPort, '0.0.0.0', () => {
             this.log.info(`🚀 API Server listening on http://127.0.0.1:${this.apiPort}`);
+        });
+
+        server.on('error', (err) => {
+            if (err.code === 'EADDRINUSE') {
+                this.log.error(`Port ${this.apiPort} already in use — is another provider instance running?`);
+            } else {
+                this.log.error(`API server error: ${err.message}`);
+            }
         });
     }
     async shutdown() {
