@@ -19,7 +19,23 @@ const crypto = require("crypto");
 const fs = require("fs");
 const child_process = require("child_process");
 const path = require("path");
+const http = require("http");
 const CONFIG = require("./config");
+
+// ─────────────────────────────────────────────────────────
+//  Transaction Queue (Nonce Safety)
+// ─────────────────────────────────────────────────────────
+class TxQueue {
+    constructor() {
+        this.queue = Promise.resolve();
+    }
+
+    add(task) {
+        this.queue = this.queue.then(() => task()).catch(err => console.error("TxQueue Error:", err));
+        return this.queue;
+    }
+}
+const globalTxQueue = new TxQueue();
 
 // ─────────────────────────────────────────────────────────
 //  ABI Definitions
@@ -229,6 +245,9 @@ class ComputeProviderNode {
         this.failedJobs = 0;
         this.heartbeatInterval = null;
         this.isRunning = false;
+        
+        // Predictable API Port based on account index (matches client/app.js registry)
+        this.apiPort = 4000 + this.accountIndex;
     }
 
     // ─── Initialization ───
@@ -271,6 +290,9 @@ class ComputeProviderNode {
 
             // Scan existing open jobs
             await this.scanOpenJobs();
+
+            // Start HTTP API Server for manual execution triggers
+            this.startApiServer();
 
             this.isRunning = true;
             this.log.success("Provider node fully operational ✓");
@@ -368,7 +390,7 @@ class ComputeProviderNode {
 
             // Check if our tier qualifies
             if (Number(requiredTier) <= this.hardware.tier) {
-                await this.submitBid(jobId, budget, description);
+                // await this.submitBid(jobId, budget, description); // Auto-bid disabled
             } else {
                 this.log.warn(`Tier mismatch — job requires ${TIER_NAMES[Number(requiredTier)]}, we offer ${this.hardwareTier}`);
             }
@@ -381,7 +403,8 @@ class ComputeProviderNode {
                     payment: ethers.formatEther(amount) + " ETH",
                     slaDeadline: new Date(Number(slaDeadline) * 1000).toLocaleTimeString()
                 });
-                await this.executeJob(jobId);
+                // Auto-execute disabled. Triggered manually via API.
+                // await this.executeJob(jobId);
             }
         });
 
@@ -442,123 +465,91 @@ class ComputeProviderNode {
 
     // ─── Job Execution ───
 
-    async executeJob(jobId) {
+    async executeJob(jobId, jobMetadata = null) {
         const jobIdNum = Number(jobId);
         this.activeJobs.set(jobIdNum, { startTime: Date.now(), status: "executing" });
 
         try {
             const job = await this.jobMarket.getJob(jobId);
             const dataHash = job.dataHash;
-            const description = job.description;
+            const description = jobMetadata || job.description;
 
             this.log.info(`⚙️  Executing job #${jobId}...`);
             this.log.info(`   Hardware: ${this.hardware.label}`);
 
             let resultHash = "";
+            let metadata = { jobType: "GENERIC" };
+            try {
+                metadata = JSON.parse(description);
+            } catch(e) {}
 
-            if (description.includes("[PYTHON-TASK]")) {
-                this.log.info("   Detected REAL Python Execution Task");
-                
-                // Decode from base64 if needed, or assume raw text. Let's assume raw text payload.
-                const pythonCode = dataHash; 
-
-                // Phase 1: Write to file
-                this.log.info("   Phase 1/4: Saving Python task payload...");
+            if (metadata.jobType === "ML_PIPELINE") {
+                this.log.info("   Detected ML_PIPELINE Task");
                 
                 const taskDir = path.join(__dirname, '..', 'tmp_tasks');
                 const outDir = path.join(__dirname, '..', 'provider_results');
                 if (!fs.existsSync(taskDir)) fs.mkdirSync(taskDir, { recursive: true });
                 if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
-                await this.jobMarket.reportProgress(jobIdNum, JSON.stringify({
-                    type: "chat", text: "I'll download the smart contract workload first, then allocate a secure native execution sandbox."
-                }));
-                await this.sleep(1500);
-
-                const scriptPath = path.join(taskDir, `task_${jobIdNum}.py`);
-                fs.writeFileSync(scriptPath, pythonCode);
+                const scriptPath = path.join(taskDir, `ml_task_${jobIdNum}.py`);
                 
-                await this.jobMarket.reportProgress(jobIdNum, JSON.stringify({
-                    type: "action", title: "Read and save payload to Sandbox", badge: "Script", steps: ["Check if tmp_tasks exists", `Write file task_${jobIdNum}.py`]
-                }));
-                await this.sleep(1500);
+                // Generate python script that outputs structured JSON logs line-by-line
+                const pythonScript = `import time\nimport json\nimport random\nimport sys\n\ndef emit(stage, step, epoch=None, loss=None, accuracy=None, f1=None, message=""):\n    data = {"stage": stage, "step": step, "message": message}\n    if epoch is not None: data["epoch"] = epoch\n    if loss is not None: data["loss"] = loss\n    if accuracy is not None: data["accuracy"] = accuracy\n    if f1 is not None: data["f1"] = f1\n    print(json.dumps(data))\n    sys.stdout.flush()\n\nemit("preprocessing", "start", message="Cleaning data...")\ntime.sleep(1)\nemit("preprocessing", "middle", message="Handling missing values...")\ntime.sleep(1)\nemit("preprocessing", "end", message="Dataset ready")\ntime.sleep(1)\n\nloss = 1.5\nfor i in range(1, 6):\n    loss = loss * 0.8\n    emit("training", "epoch", epoch=i, loss=loss, message=f"Epoch {i} completed")\n    time.sleep(1)\n\nemit("evaluation", "start", message="Running test set evaluation...")\ntime.sleep(1)\nemit("evaluation", "end", accuracy=0.92, f1=0.89, message="Evaluation complete")\ntime.sleep(1)`;
+                fs.writeFileSync(scriptPath, pythonScript);
 
-                // Phase 2-3: Execution
-                this.log.info("   Phase 2-3/4: Executing Python script natively...");
-                await this.jobMarket.reportProgress(jobIdNum, JSON.stringify({
-                    type: "chat", text: "Now I have everything I need. Let me execute the Python workload natively."
-                }));
-                await this.sleep(1500);
-
-                await this.jobMarket.reportProgress(jobIdNum, JSON.stringify({
-                    type: "action", title: "Spawn physical child process", badge: "Script", steps: [`Execute python "tmp_tasks/task_${jobIdNum}.py"`, `Awaiting stdout buffers...`]
-                }));
-                
+                this.log.info("   Spawning python process...");
                 let executionOutput = "";
-                try {
-                    // Timeout of 30 seconds for safety in sandbox
-                    executionOutput = child_process.execSync(`python "${scriptPath}"`, { timeout: 30000 }).toString();
-                    this.log.success("   Execution Successful");
-                } catch (execErr) {
-                    this.log.warn(`   Execution Error/Stderr: ${execErr.message}`);
-                    executionOutput = (execErr.stdout ? execErr.stdout.toString() : "") + "\nERROR: " + execErr.message;
-                }
                 
-                this.log.metric("   Task output captured.", { outputLength: executionOutput.length });
+                await new Promise((resolve, reject) => {
+                    const process = child_process.spawn("python", [scriptPath]);
+                    
+                    process.stdout.on('data', async (data) => {
+                        const lines = data.toString().split('\n').filter(l => l.trim() !== '');
+                        for(let line of lines) {
+                            executionOutput += line + "\n";
+                            this.log.info(`   [Python] ${line}`);
+                            try {
+                                JSON.parse(line); // Ensure valid JSON
+                                await globalTxQueue.add(async () => {
+                                    const tx = await this.jobMarket.reportProgress(jobIdNum, line);
+                                    await tx.wait();
+                                    await this.sleep(500); // Rate limiting
+                                });
+                            } catch(e) {}
+                        }
+                    });
 
-                const outDir = path.join(__dirname, '..', 'provider_results');
-                if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+                    process.stderr.on('data', (data) => {
+                        this.log.warn(`   [Python STDERR] ${data}`);
+                    });
+
+                    process.on('close', (code) => {
+                        if (code === 0) resolve();
+                        else reject(new Error(`Process exited with code ${code}`));
+                    });
+                });
+
                 const resultPath = path.join(outDir, `job_${jobIdNum}_result.txt`);
                 fs.writeFileSync(resultPath, executionOutput);
 
-                // Phase 4: Result packaging (Base64 Encode)
-                this.log.info("   Phase 4/4: Packaging execution results...");
-                
-                await this.jobMarket.reportProgress(jobIdNum, JSON.stringify({
-                    type: "chat", text: `The processes have successfully completed. I have combined all the execution outputs and saved them securely to the provider's physical server layer at: \n\`${resultPath}\`\n\nI will now convert this data to Base64 and submit it to Ethereum.`
-                }));
-                await this.sleep(2000);
-
                 const encodedOutput = Buffer.from(executionOutput).toString("base64");
-                
-                await this.jobMarket.reportProgress(jobIdNum, JSON.stringify({
-                    type: "action", title: "Encode and submit to blockchain", badge: "Smart Contract", steps: [`Buffer.from(stdout).toString("base64")`, `jobMarket.submitResult(${jobIdNum}, hash)`]
-                }));
-                
                 resultHash = `RESULT_B64:${encodedOutput}`;
-                await this.sleep(500);
 
             } else {
                 this.log.info("   Running standard simulation task...");
                 this.log.info(`   Input data: ${dataHash}`);
-                // Phase 1: Data ingestion simulation
-                this.log.info("   Phase 1/4: Data ingestion...");
                 await this.sleep(1000);
-
-                // Phase 2: Preprocessing
-                this.log.info("   Phase 2/4: Preprocessing & validation...");
-                await this.sleep(1500);
-
-                // Phase 3: Computation with proof generation
-                this.log.info("   Phase 3/4: Core computation...");
                 const proof = ProofOfComputation.generateHashChain(dataHash, 100);
-                this.log.metric("   Proof-of-computation generated", {
-                    inputHash: proof.inputHash.substring(0, 16) + "...",
-                    outputHash: proof.outputHash.substring(0, 16) + "...",
-                    iterations: proof.iterations
-                });
-                await this.sleep(2000);
-
-                // Phase 4: Result packaging
-                this.log.info("   Phase 4/4: Packaging results...");
                 resultHash = `QmResult_${proof.outputHash.substring(0, 32)}`;
                 await this.sleep(500);
             }
 
-            // Submit result on-chain
+            // Submit result on-chain using TxQueue
             this.log.info(`📤 Submitting result for job #${jobId}...`);
-            const tx = await this.jobMarket.submitResult(jobId, resultHash);
-            await tx.wait();
+            await globalTxQueue.add(async () => {
+                const tx = await this.jobMarket.submitResult(jobId, resultHash);
+                await tx.wait();
+            });
 
             this.activeJobs.set(jobIdNum, { ...this.activeJobs.get(jobIdNum), status: "completed" });
             this.log.success(`Job #${jobId} execution complete`, { resultHash: resultHash.length > 50 ? resultHash.substring(0, 50) + "..." : resultHash });
@@ -567,6 +558,17 @@ class ComputeProviderNode {
             this.failedJobs++;
             this.activeJobs.set(jobIdNum, { ...this.activeJobs.get(jobIdNum), status: "failed" });
             this.log.error(`Job #${jobId} execution failed`, { error: err.message });
+            
+            // Try to report error to chain
+            try {
+                await globalTxQueue.add(async () => {
+                    const tx = await this.jobMarket.reportProgress(jobIdNum, JSON.stringify({
+                        stage: "error",
+                        message: "Execution failed"
+                    }));
+                    await tx.wait();
+                });
+            } catch(e) {}
         }
     }
 
@@ -582,7 +584,7 @@ class ComputeProviderNode {
                 if (Number(job.status) === 0) { // Open
                     this.log.info(`Found open job #${i}: "${job.description.substring(0, 50)}..."`);
                     if (Number(job.requiredTier) <= this.hardware.tier) {
-                        await this.submitBid(i, job.budget, job.description);
+                        // await this.submitBid(i, job.budget, job.description); // Auto-bidding disabled
                     }
                 }
             }
@@ -635,6 +637,74 @@ class ComputeProviderNode {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    // ─── HTTP API Server ───
+    startApiServer() {
+        const setCORS = (res) => {
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+            res.setHeader('Access-Control-Max-Age', '86400');
+        };
+
+        const server = http.createServer(async (req, res) => {
+            setCORS(res);
+
+            // Handle CORS preflight
+            if (req.method === 'OPTIONS') {
+                res.writeHead(204);
+                res.end();
+                return;
+            }
+
+            // Health check
+            if (req.method === 'GET' && req.url === '/health') {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ status: 'ok', provider: this.providerName, port: this.apiPort }));
+                return;
+            }
+
+            if (req.method === 'POST' && req.url === '/execute') {
+                let body = '';
+                req.on('data', chunk => { body += chunk.toString(); });
+                req.on('end', async () => {
+                    try {
+                        const data = JSON.parse(body);
+                        const jobId = data.jobId;
+                        const metadata = data.jobMetadata;
+
+                        this.log.info(`Received API request to execute job #${jobId}`);
+
+                        // Run in background so request can return immediately
+                        this.executeJob(jobId, metadata).catch(err =>
+                            this.log.error(`Background execution error for job #${jobId}`, { error: err.message })
+                        );
+
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ success: true, message: `Execution started for job #${jobId}` }));
+                    } catch (e) {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: e.message }));
+                    }
+                });
+            } else {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Not found' }));
+            }
+        });
+
+        // Bind to all interfaces so both localhost and 127.0.0.1 resolve correctly
+        server.listen(this.apiPort, '0.0.0.0', () => {
+            this.log.info(`🚀 API Server listening on http://127.0.0.1:${this.apiPort}`);
+        });
+
+        server.on('error', (err) => {
+            if (err.code === 'EADDRINUSE') {
+                this.log.error(`Port ${this.apiPort} already in use — is another provider instance running?`);
+            } else {
+                this.log.error(`API server error: ${err.message}`);
+            }
+        });
+    }
     async shutdown() {
         this.log.info("Shutting down...");
         if (this.heartbeatInterval) {

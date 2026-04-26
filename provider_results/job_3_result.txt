@@ -1,0 +1,10 @@
+{"stage": "preprocessing", "step": "start", "message": "Cleaning data..."}
+{"stage": "preprocessing", "step": "middle", "message": "Handling missing values..."}
+{"stage": "preprocessing", "step": "end", "message": "Dataset ready"}
+{"stage": "training", "step": "epoch", "message": "Epoch 1 completed", "epoch": 1, "loss": 1.2000000000000002}
+{"stage": "training", "step": "epoch", "message": "Epoch 2 completed", "epoch": 2, "loss": 0.9600000000000002}
+{"stage": "training", "step": "epoch", "message": "Epoch 3 completed", "epoch": 3, "loss": 0.7680000000000002}
+{"stage": "training", "step": "epoch", "message": "Epoch 4 completed", "epoch": 4, "loss": 0.6144000000000003}
+{"stage": "training", "step": "epoch", "message": "Epoch 5 completed", "epoch": 5, "loss": 0.49152000000000023}
+{"stage": "evaluation", "step": "start", "message": "Running test set evaluation..."}
+{"stage": "evaluation", "step": "end", "message": "Evaluation complete", "accuracy": 0.92, "f1": 0.89}

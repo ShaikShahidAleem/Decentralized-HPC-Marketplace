@@ -13,7 +13,8 @@
     "provider": "node provider/index.js",
     "provider:multi": "node provider/multi-provider.js",
     "provider:remote": "node provider/index.js",
-    "client": "npx http-server client -p 3000 -c-1"
+    "client": "npx http-server client -p 3000 -c-1",
+    "start": "node scripts/start-all.js"
   },
   "keywords": [
     "blockchain",
